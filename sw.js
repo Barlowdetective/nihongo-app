@@ -1,21 +1,15 @@
-const CACHE_NAME = 'nihongo-v1';
+const CACHE_NAME = 'nihongo-v2';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './icons/icon-192x192.png',
   './icons/icon-512x512.png',
-  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
 ];
 
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(ASSETS).catch(err => {
-        console.log('Cache warning:', err);
-      });
-    })
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS).catch(()=>{}))
   );
   self.skipWaiting();
 });
@@ -39,9 +33,7 @@ self.addEventListener('fetch', e => {
           caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
         }
         return response;
-      }).catch(() => {
-        return new Response('Offline', { status: 503 });
-      });
+      }).catch(() => new Response('Offline', { status: 503 }));
     })
   );
 });
