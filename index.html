@@ -1,0 +1,1945 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#C0392B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="標準日本語">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>標準日本語 初級</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --red:#C0392B;--red-dark:#96281B;--red-light:#E74C3C;
+  --gold:#E8A020;--gold-light:#FDF3E3;
+  --ink:#1A1412;--ink2:#4A3F3A;--ink3:#8A7F7A;
+  --surface:#FDFAF6;--surface2:#F5F0EB;--surface3:#EDE8E3;
+  --white:#FFFFFF;
+  --green:#1D7A4A;--green-bg:#EAF5EE;
+  --blue:#1A5FA0;--blue-bg:#E8F1FB;
+  --radius:14px;--radius-sm:8px;
+  --shadow:0 1px 3px rgba(0,0,0,0.08),0 4px 16px rgba(0,0,0,0.06);
+}
+body{font-family:-apple-system,'Hiragino Sans','Noto Sans JP','Yu Gothic',sans-serif;background:var(--surface);color:var(--ink);height:100dvh;height:100vh;overflow:hidden;display:flex;flex-direction:column;font-size:15px;position:fixed;width:100%}
+
+/* HEADER */
+.header{background:var(--red);color:#fff;padding:14px 16px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0;position:relative}
+.header-back{background:rgba(255,255,255,0.18);border:none;color:#fff;width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.header-back:active{background:rgba(255,255,255,0.32)}
+.header-title{font-size:16px;font-weight:700;letter-spacing:0.2px;flex:1}
+.header-sub{font-size:11px;opacity:0.75;margin-top:1px}
+.header-badge{background:rgba(255,255,255,0.2);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:600;flex-shrink:0}
+
+/* SCREENS */
+.screen{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+.screen.hidden{display:none}
+.scroll{overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch;min-height:0}  /* legacy, use tab-panel */
+
+/* TAB PANELS — single source of truth for show/hide */
+.tab-panel{display:none;flex-direction:column;flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.tab-panel.active{display:flex}
+.tab-panel-flex{overflow:hidden}
+.tab-panel-flex.active{display:flex}
+
+/* BOTTOM NAV */
+.bottom-nav{background:var(--white);border-top:1px solid var(--surface3);display:flex;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,0)}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 4px 7px;border:none;background:none;color:var(--ink3);font-size:10px;cursor:pointer;transition:color .15s}
+.nav-btn.active{color:var(--red)}
+.nav-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* HOME SCREEN */
+.home-hero{background:var(--red);padding:0 16px 20px;color:#fff}
+.hero-jp{font-size:28px;font-weight:700;letter-spacing:2px;margin-bottom:4px}
+.hero-zh{font-size:13px;opacity:0.8}
+.progress-bar-wrap{background:rgba(255,255,255,0.2);border-radius:4px;height:6px;margin-top:14px}
+.progress-bar{background:#fff;height:6px;border-radius:4px;transition:width .4s}
+.progress-label{font-size:11px;opacity:0.8;margin-top:6px}
+
+.section-label{padding:14px 16px 6px;font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:1px;text-transform:uppercase}
+
+.unit-card{margin:0 16px 10px;background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.unit-header{padding:12px 14px;background:var(--ink);display:flex;align-items:center;gap:10px}
+.unit-tag{background:var(--gold);color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;letter-spacing:0.5px}
+.unit-name-jp{font-size:14px;font-weight:700;color:#fff}
+.unit-name-zh{font-size:11px;color:rgba(255,255,255,0.6);margin-top:1px}
+
+.lesson-row{display:flex;align-items:center;padding:12px 14px;gap:12px;cursor:pointer;border-top:1px solid var(--surface2);transition:background .1s}
+.lesson-row:active{background:var(--surface2)}
+.lesson-circle{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.lesson-circle.done{background:var(--green-bg);color:var(--green)}
+.lesson-circle.active{background:var(--red);color:#fff}
+.lesson-circle.locked{background:var(--surface3);color:var(--ink3)}
+.lesson-info{flex:1;min-width:0}
+.lesson-title{font-size:14px;font-weight:600;line-height:1.3}
+.lesson-meta{font-size:11px;color:var(--ink3);margin-top:2px}
+.lesson-chevron{color:var(--ink3);font-size:18px;flex-shrink:0}
+
+/* LESSON SCREEN — TABS */
+.lesson-tabs{display:flex;background:var(--white);border-bottom:1px solid var(--surface3);flex-shrink:0;min-height:44px}
+.tab-btn{flex:1;padding:11px 4px;border:none;background:none;font-size:13px;color:var(--ink3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;font-weight:500}
+.tab-btn.active{color:var(--red);border-bottom-color:var(--red)}
+
+/* DIALOGUE */
+.dialogue-wrap{padding:16px;min-height:100%}
+.dialogue-intro{background:var(--gold-light);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:16px;font-size:13px;color:var(--ink2);line-height:1.6}
+.dialogue-intro strong{color:var(--gold);font-weight:700}
+
+.dialogue-line{display:flex;gap:10px;margin-bottom:16px;align-items:flex-start}
+.dialogue-line.right{flex-direction:row-reverse}
+.speaker-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;margin-top:2px}
+.speaker-a{background:#E8F1FB;color:var(--blue)}
+.speaker-b{background:#EAF5EE;color:var(--green)}
+.speaker-c{background:#FDF3E3;color:var(--gold)}
+.bubble{background:var(--white);border-radius:var(--radius);padding:10px 13px;box-shadow:var(--shadow);max-width:calc(100% - 56px);cursor:pointer;border:1px solid var(--surface3)}
+.bubble:active{background:var(--surface2)}
+.bubble-jp{font-size:16px;line-height:1.5;font-weight:500}
+.bubble-reading{font-size:11px;color:var(--ink3);margin-top:2px}
+.bubble-zh{font-size:12px;color:var(--ink3);margin-top:4px;padding-top:4px;border-top:1px solid var(--surface3)}
+.speak-hint{font-size:11px;color:var(--ink3);margin-bottom:4px}
+
+.dialogue-line.right .bubble{background:var(--blue-bg);border-color:transparent}
+.play-all-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--red);color:#fff;border:none;border-radius:30px;padding:12px 24px;font-size:14px;font-weight:600;cursor:pointer;margin:8px auto 20px;width:fit-content}
+.play-all-btn:active{background:var(--red-dark)}
+.play-all-btn svg{width:18px;height:18px;fill:#fff;stroke:none}
+
+/* VOCABULARY CARD TURNER */
+.vocab-turner{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:12px 16px 16px;gap:12px;min-height:0}
+.vocab-card-main{flex:1;background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:10px;cursor:pointer;border:1px solid var(--surface3);transition:transform .12s;user-select:none}
+.vocab-card-main:active{transform:scale(0.98)}
+.vc-type{font-size:11px;font-weight:700;background:var(--surface3);color:var(--ink3);padding:3px 10px;border-radius:20px;letter-spacing:0.5px}
+.vc-jp{font-size:44px;font-weight:700;text-align:center;line-height:1.2;color:var(--ink)}
+.vc-reading{font-size:17px;color:var(--ink3);text-align:center;min-height:26px}
+.vc-divider{width:40px;height:2px;background:var(--surface3);border-radius:2px}
+.vc-zh{font-size:22px;font-weight:600;color:var(--ink2);text-align:center}
+.vc-speak{background:var(--surface2);border:none;border-radius:30px;padding:9px 20px;font-size:14px;color:var(--ink2);cursor:pointer;margin-top:6px}
+.vocab-nav-row{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.vocab-nav-btn{width:48px;height:48px;border-radius:50%;border:none;background:var(--white);box-shadow:var(--shadow);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink);flex-shrink:0}
+.vocab-nav-btn:active{background:var(--surface2)}
+.vocab-nav-btn:disabled{opacity:0.25;cursor:default}
+.vocab-dots{flex:1;display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap}
+.vocab-dot{width:7px;height:7px;border-radius:50%;background:var(--surface3);transition:background .2s;cursor:pointer;flex-shrink:0}
+.vocab-dot.active{background:var(--red);transform:scale(1.3)}
+.vocab-counter{font-size:13px;color:var(--ink3);text-align:center;flex-shrink:0;min-width:40px}
+
+/* GRAMMAR */
+.grammar-wrap{padding:16px}
+.grammar-point{background:var(--white);border-radius:var(--radius);padding:14px;margin-bottom:14px;box-shadow:var(--shadow)}
+.grammar-num{font-size:10px;font-weight:700;color:var(--red);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.grammar-title{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:6px}
+.grammar-pattern{background:var(--surface2);border-left:3px solid var(--red);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:8px 12px;font-size:14px;font-weight:600;color:var(--ink);margin-bottom:8px;font-family:monospace}
+.grammar-desc{font-size:13px;color:var(--ink2);line-height:1.7;margin-bottom:10px}
+.grammar-examples{display:flex;flex-direction:column;gap:6px}
+.grammar-ex{background:var(--surface2);border-radius:var(--radius-sm);padding:8px 10px;cursor:pointer}
+.grammar-ex:active{background:var(--surface3)}
+.grammar-ex-jp{font-size:14px;font-weight:500}
+.grammar-ex-zh{font-size:12px;color:var(--ink3);margin-top:2px}
+
+/* FLASHCARDS */
+.flashcard-wrap{display:flex;flex-direction:column;align-items:center;padding:16px;gap:14px;flex:1;min-height:0;overflow:hidden}
+.flashcard{width:100%;flex:1;min-height:0;background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;cursor:pointer;border:1px solid var(--surface3);transition:transform .1s}
+.flashcard:active{transform:scale(0.98)}
+.fc-word{font-size:36px;font-weight:700;text-align:center;line-height:1.3}
+.fc-reading{font-size:16px;color:var(--ink3);margin-top:6px;text-align:center}
+.fc-zh{font-size:18px;color:var(--ink2);margin-top:12px;font-weight:500;text-align:center}
+.fc-hint{font-size:12px;color:var(--ink3);margin-top:8px}
+.fc-hidden{display:none}
+.fc-controls{display:flex;gap:12px;width:100%}
+.fc-btn{flex:1;padding:13px;border-radius:var(--radius);border:none;font-size:14px;font-weight:700;cursor:pointer}
+.fc-btn.wrong{background:#FDECEC;color:#C0392B}
+.fc-btn.right{background:#EAF5EE;color:#1D7A4A}
+.fc-btn:active{opacity:0.8}
+.fc-progress{font-size:13px;color:var(--ink3)}
+.fc-speak-btn{background:var(--surface2);border:none;border-radius:30px;padding:8px 16px;font-size:13px;color:var(--ink2);cursor:pointer;display:flex;align-items:center;gap:6px}
+
+/* QUIZ SCREEN */
+.quiz-wrap{padding:16px;display:flex;flex-direction:column;gap:12px;flex:1;min-height:0}
+.quiz-q{font-size:18px;font-weight:700;text-align:center;padding:20px 16px;background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow)}
+.quiz-q-sub{font-size:13px;color:var(--ink3);margin-top:4px;font-weight:400}
+.quiz-options{display:flex;flex-direction:column;gap:10px}
+.quiz-opt{padding:14px 16px;background:var(--white);border:1.5px solid var(--surface3);border-radius:var(--radius);font-size:15px;cursor:pointer;text-align:left;transition:all .15s;font-weight:500}
+.quiz-opt:active{background:var(--surface2)}
+.quiz-opt.correct{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+.quiz-opt.wrong{background:#FDECEC;border-color:var(--red);color:var(--red)}
+.quiz-score{text-align:center;padding:20px;font-size:16px;color:var(--ink2)}
+.quiz-score-num{font-size:48px;font-weight:700;color:var(--red);display:block}
+
+@keyframes pulse{to{transform:scale(1.1)}}
+
+/* SETTINGS */
+.settings-wrap{padding:0 0 80px}
+.settings-group{margin-top:20px}
+.settings-group-label{padding:6px 16px;font-size:11px;color:var(--ink3);font-weight:700;letter-spacing:0.8px;text-transform:uppercase}
+.settings-row{background:var(--white);padding:14px 16px;border-bottom:1px solid var(--surface2);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.settings-row-title{font-size:15px;font-weight:500}
+.settings-row-desc{font-size:12px;color:var(--ink3);margin-top:1px}
+.toggle{width:48px;height:28px;background:var(--surface3);border-radius:14px;border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.toggle.on{background:var(--red)}
+.toggle::after{content:'';position:absolute;width:22px;height:22px;background:#fff;border-radius:50%;top:3px;left:3px;transition:left .2s}
+.toggle.on::after{left:23px}
+.install-banner{margin:16px;background:linear-gradient(135deg,var(--red),var(--red-dark));border-radius:var(--radius);padding:16px;color:#fff}
+.install-banner h3{font-size:15px;font-weight:700;margin-bottom:6px}
+.install-banner p{font-size:12px;opacity:0.85;line-height:1.6}
+.install-banner ol{padding-left:16px;font-size:12px;opacity:0.85;line-height:1.9;margin-top:6px}
+
+/* TOAST */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;opacity:0;transition:all .3s;pointer-events:none;z-index:999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header" id="main-header">
+  <button class="header-back hidden" id="back-btn" onclick="goBack()">‹</button>
+  <div style="flex:1">
+    <div class="header-title" id="header-title">標準日本語</div>
+    <div class="header-sub" id="header-sub">新版中日交流 · 初级上册</div>
+  </div>
+  <div class="header-badge" id="header-badge">初级</div>
+</div>
+
+<!-- SCREEN: HOME -->
+<div class="screen" id="screen-home">
+  <div class="scroll">
+    <div class="home-hero">
+      <div class="hero-jp">日本語を学ぼう</div>
+      <div class="hero-zh">开始学习日语吧</div>
+      <div class="progress-bar-wrap"><div class="progress-bar" id="home-progress" style="width:0%"></div></div>
+      <div class="progress-label" id="home-progress-label">共 26 课 · 包含入门单元</div>
+    </div>
+
+    <div class="section-label">入门单元 · 入門単元</div>
+    <div class="unit-card">
+      <div class="unit-header">
+        <div><div class="unit-tag">入门</div></div>
+        <div><div class="unit-name-jp">発音・文字</div><div class="unit-name-zh">发音与文字</div></div>
+      </div>
+      <div class="lesson-row" onclick="openLesson('intro1')">
+        <div class="lesson-circle done">✓</div>
+        <div class="lesson-info"><div class="lesson-title">日语的发音</div><div class="lesson-meta">五十音图 · 清音・浊音</div></div>
+        <div class="lesson-chevron">›</div>
+      </div>
+      <div class="lesson-row" onclick="openLesson('intro2')">
+        <div class="lesson-circle done">✓</div>
+        <div class="lesson-info"><div class="lesson-title">日语的文字</div><div class="lesson-meta">平假名・片假名・汉字</div></div>
+        <div class="lesson-chevron">›</div>
+      </div>
+    </div>
+
+    <div class="section-label">第1単元 · 小李赴日</div>
+    <div class="unit-card">
+      <div class="unit-header">
+        <div><div class="unit-tag">第1単元</div></div>
+        <div><div class="unit-name-jp">李さん日本へ</div><div class="unit-name-zh">小李赴日</div></div>
+      </div>
+      <div class="lesson-row" onclick="openLesson('l1')">
+        <div class="lesson-circle active">1</div>
+        <div class="lesson-info"><div class="lesson-title">李さんは　中国人です</div><div class="lesson-meta">李先生是中国人 · 判断句</div></div>
+        <div class="lesson-chevron">›</div>
+      </div>
+      <div class="lesson-row" onclick="openLesson('l2')">
+        <div class="lesson-circle locked">2</div>
+        <div class="lesson-info"><div class="lesson-title">これは　本です</div><div class="lesson-meta">这是书 · 指示代词</div></div>
+        <div class="lesson-chevron">›</div>
+      </div>
+      <div class="lesson-row" onclick="openLesson('l3')">
+        <div class="lesson-circle locked">3</div>
+        <div class="lesson-info"><div class="lesson-title">ここは　デパートです</div><div class="lesson-meta">这里是百货公司 · 场所代词</div></div>
+        <div class="lesson-chevron">›</div>
+      </div>
+      <div class="lesson-row" onclick="openLesson('l4')">
+        <div class="lesson-circle locked">4</div>
+        <div class="lesson-info"><div class="lesson-title">部屋に　机と　いすが　あります</div><div class="lesson-meta">房间里有桌子和椅子 · 存在句</div></div>
+        <div class="lesson-chevron">›</div>
+      </div>
+    </div>
+
+    <div class="unit-card">
+      <div class="unit-header">
+        <div><div class="unit-tag">第2単元</div></div>
+        <div><div class="unit-name-jp">李さんの会社生活①</div><div class="unit-name-zh">小李的公司生活①</div></div>
+      </div>
+      <div class="lesson-row" onclick="openLesson('l5')"><div class="lesson-circle locked">5</div><div class="lesson-info"><div class="lesson-title">森さんは　7時に　起きます</div><div class="lesson-meta">动词ます形 · 时间表达</div></div><div class="lesson-chevron">›</div></div>
+      <div class="lesson-row" onclick="openLesson('l6')"><div class="lesson-circle locked">6</div><div class="lesson-info"><div class="lesson-title">吉田さんは　来月　中国へ　行きます</div><div class="lesson-meta">移动动词 · 方向助词へ</div></div><div class="lesson-chevron">›</div></div>
+      <div class="lesson-row" onclick="openLesson('l7')"><div class="lesson-circle locked">7</div><div class="lesson-info"><div class="lesson-title">李さんは　毎日　コーヒーを　飲みます</div><div class="lesson-meta">他动词 · 宾语助词を</div></div><div class="lesson-chevron">›</div></div>
+      <div class="lesson-row" onclick="openLesson('l8')"><div class="lesson-circle locked">8</div><div class="lesson-info"><div class="lesson-title">李さんは　日本語で　手紙を　書きます</div><div class="lesson-meta">手段助词で · 一起做动作</div></div><div class="lesson-chevron">›</div></div>
+    </div>
+
+    <div class="unit-card">
+      <div class="unit-header">
+        <div><div class="unit-tag">第3単元</div></div>
+        <div><div class="unit-name-jp">李さん箱根へ</div><div class="unit-name-zh">小李在箱根</div></div>
+      </div>
+      <div class="lesson-row" onclick="openLesson('l9')"><div class="lesson-circle locked">9</div><div class="lesson-info"><div class="lesson-title">四川料理は　辛いです</div><div class="lesson-meta">イ形容词 · ナ形容词</div></div><div class="lesson-chevron">›</div></div>
+      <div class="lesson-row" onclick="openLesson('l10')"><div class="lesson-circle locked">10</div><div class="lesson-info"><div class="lesson-title">京都の　紅葉は　有名です</div><div class="lesson-meta">形容词修饰名词 · どんな</div></div><div class="lesson-chevron">›</div></div>
+      <div class="lesson-row" onclick="openLesson('l11')"><div class="lesson-circle locked">11</div><div class="lesson-info"><div class="lesson-title">小野さんは　歌が　好きです</div><div class="lesson-meta">好き・嫌い・上手 + が</div></div><div class="lesson-chevron">›</div></div>
+      <div class="lesson-row" onclick="openLesson('l12')"><div class="lesson-circle locked">12</div><div class="lesson-info"><div class="lesson-title">李さんは　森さんより　若いです</div><div class="lesson-meta">比较句型 より・のほうが</div></div><div class="lesson-chevron">›</div></div>
+    </div>
+
+    <div class="unit-card">
+      <div class="unit-header">
+        <div><div class="unit-tag">第4単元</div></div>
+        <div><div class="unit-name-jp">李さんの会社生活②</div><div class="unit-name-zh">小李的公司生活②</div></div>
+      </div>
+      <div class="lesson-row" onclick="openLesson('l13')"><div class="lesson-circle locked">13</div><div class="lesson-info"><div class="lesson-title">机の　上に　本が　3冊　あります</div><div class="lesson-meta">数量词 · 助数词</div></div><div class="lesson-chevron">›</div></div>
+      <div class="lesson-row" onclick="openLesson('l14')"><div class="lesson-circle locked">14</div><div class="lesson-info"><div class="lesson-title">昨日　デパートへ　行って、買い物しました</div><div class="lesson-meta">动词て形 · 过去时</div></div><div class="lesson-chevron">›</div></div>
+      <div class="lesson-row" onclick="openLesson('l15')"><div class="lesson-circle locked">15</div><div class="lesson-info"><div class="lesson-title">小野さんは　今　新聞を　読んで　います</div><div class="lesson-meta">〜ています（进行/状态）</div></div><div class="lesson-chevron">›</div></div>
+      <div class="lesson-row" onclick="openLesson('l16')"><div class="lesson-circle locked">16</div><div class="lesson-info"><div class="lesson-title">ホテルの　部屋は　広くて　明るいです</div><div class="lesson-meta">形容词て形连接 · 程度副词</div></div><div class="lesson-chevron">›</div></div>
+    </div>
+
+    <div class="unit-card">
+      <div class="unit-header">
+        <div><div class="unit-tag">第5単元</div></div>
+        <div><div class="unit-name-jp">李さん日本でお正月</div><div class="unit-name-zh">小李在日本迎新春</div></div>
+      </div>
+      <div class="lesson-row" onclick="openLesson('l17')"><div class="lesson-circle locked">17</div><div class="lesson-info"><div class="lesson-title">わたしは　新しい　洋服が　欲しいです</div><div class="lesson-meta">欲しい · 〜たいです</div></div><div class="lesson-chevron">›</div></div>
+      <div class="lesson-row" onclick="openLesson('l18')"><div class="lesson-circle locked">18</div><div class="lesson-info"><div class="lesson-title">携帯電話は　とても　小さく　なりました</div><div class="lesson-meta">〜くなります・〜になります</div></div><div class="lesson-chevron">›</div></div>
+      <div class="lesson-row" onclick="openLesson('l19')"><div class="lesson-circle locked">19</div><div class="lesson-info"><div class="lesson-title">部屋の　かぎを　忘れないで　ください</div><div class="lesson-meta">〜てください · 〜ないでください</div></div><div class="lesson-chevron">›</div></div>
+      <div class="lesson-row" onclick="openLesson('l20')"><div class="lesson-circle locked">20</div><div class="lesson-info"><div class="lesson-title">スミスさんは　ピアノを　弾く　ことが　できます</div><div class="lesson-meta">〜ことができます（能力）</div></div><div class="lesson-chevron">›</div></div>
+    </div>
+
+    <div class="unit-card">
+      <div class="unit-header">
+        <div><div class="unit-tag">第6単元</div></div>
+        <div><div class="unit-name-jp">李さんの新しい仕事</div><div class="unit-name-zh">小李的新任务</div></div>
+      </div>
+      <div class="lesson-row" onclick="openLesson('l21')"><div class="lesson-circle locked">21</div><div class="lesson-info"><div class="lesson-title">荷物を　送って　もらいました</div><div class="lesson-meta">授受动词 もらう・くれる・あげる</div></div><div class="lesson-chevron">›</div></div>
+      <div class="lesson-row" onclick="openLesson('l22')"><div class="lesson-circle locked">22</div><div class="lesson-info"><div class="lesson-title">森さんは　李さんに　辞書を　くれました</div><div class="lesson-meta">授受动词综合用法 · から理由</div></div><div class="lesson-chevron">›</div></div>
+      <div class="lesson-row" onclick="openLesson('l23')"><div class="lesson-circle locked">23</div><div class="lesson-info"><div class="lesson-title">田中さんは　来年　結婚すると　言っていました</div><div class="lesson-meta">〜と言っています · 〜そうです</div></div><div class="lesson-chevron">›</div></div>
+      <div class="lesson-row" onclick="openLesson('l24')"><div class="lesson-circle locked">24</div><div class="lesson-info"><div class="lesson-title">李さんは　会議室に　入って　はいけません</div><div class="lesson-meta">〜てもいい · 〜てはいけない · 〜なければ</div></div><div class="lesson-chevron">›</div></div>
+    </div>
+    <div style="height:80px"></div>
+  </div>
+</div>
+
+<!-- SCREEN: LESSON -->
+<div class="screen hidden" id="screen-lesson">
+  <div class="lesson-tabs">
+    <button class="tab-btn active" onclick="switchTab('dialogue')">会话</button>
+    <button class="tab-btn" onclick="switchTab('vocab')">词汇</button>
+    <button class="tab-btn" onclick="switchTab('grammar')">语法</button>
+    <button class="tab-btn" onclick="switchTab('flashcard')">单词卡</button>
+    <button class="tab-btn" onclick="switchTab('quiz')">测验</button>
+  </div>
+
+  <!-- Dialogue Tab -->
+  <div class="tab-panel scroll" id="tab-dialogue">
+    <div class="dialogue-wrap" id="dialogue-content"></div>
+  </div>
+
+  <!-- Vocab Tab -->
+  <div class="tab-panel tab-panel-flex" id="tab-vocab">
+    <div class="vocab-turner" id="vocab-turner-wrap"></div>
+  </div>
+
+  <!-- Grammar Tab -->
+  <div class="tab-panel scroll" id="tab-grammar">
+    <div class="grammar-wrap" id="grammar-content"></div>
+  </div>
+
+  <!-- Flashcard Tab -->
+  <div class="tab-panel tab-panel-flex" id="tab-flashcard">
+    <div class="flashcard-wrap" id="flashcard-content"></div>
+  </div>
+
+  <!-- Quiz Tab -->
+  <div class="tab-panel scroll" id="tab-quiz">
+    <div class="quiz-wrap" id="quiz-content"></div>
+  </div>
+
+
+</div>
+
+<!-- SCREEN: SETTINGS -->
+<div class="screen hidden" id="screen-settings">
+  <div class="scroll settings-wrap">
+    <div class="install-banner">
+      <h3>📲 安装到手机主屏幕</h3>
+      <p>让应用像原生App一样运行：</p>
+      <ol>
+        <li><strong>iOS Safari:</strong> 分享按钮 → "添加到主屏幕"</li>
+        <li><strong>Android Chrome:</strong> 菜单 → "添加到主屏幕"</li>
+      </ol>
+    </div>
+    <div class="settings-group">
+      <div class="settings-group-label">发音设置</div>
+      <div class="settings-row">
+        <div><div class="settings-row-title">语速</div><div class="settings-row-desc">朗读速度 (当前: <span id="rate-val">0.85</span>)</div></div>
+        <input type="range" min="0.5" max="1.5" step="0.05" value="0.85" style="width:100px" oninput="document.getElementById('rate-val').textContent=parseFloat(this.value).toFixed(2);voiceRate=parseFloat(this.value)">
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-row-title">自动朗读对话</div><div class="settings-row-desc">切换至会话标签时自动播放</div></div>
+        <button class="toggle" id="toggle-auto" onclick="this.classList.toggle('on')"></button>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-row-title">日语声音</div></div>
+        <select id="voice-select" style="font-size:13px;max-width:150px" onchange="selectedVoiceURI=this.value"></select>
+      </div>
+    </div>
+    <div class="settings-group">
+      <div class="settings-group-label">学习设置</div>
+      <div class="settings-row">
+        <div><div class="settings-row-title">显示假名注音</div><div class="settings-row-desc">在汉字下方显示读音</div></div>
+        <button class="toggle on" id="toggle-furigana" onclick="this.classList.toggle('on')"></button>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-row-title">显示中文翻译</div><div class="settings-row-desc">在对话中显示中文</div></div>
+        <button class="toggle on" id="toggle-zh" onclick="this.classList.toggle('on')"></button>
+      </div>
+    </div>
+    <div class="settings-group">
+      <div class="settings-group-label">关于</div>
+      <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:4px">
+        <div class="settings-row-title">标准日本语 学习应用</div>
+        <div class="settings-row-desc">基于《新版中日交流标准日本语》初级上册（第二版）<br>人民教育出版社 · 光村图书出版株式会社</div>
+      </div>
+    </div>
+    <div style="height:80px"></div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-home" onclick="showHome()">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    目录
+  </button>
+  <button class="nav-btn" id="nav-settings" onclick="showSettings()">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    设置
+  </button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// LESSON DATA
+// ============================================================
+const LESSONS = {
+
+l1: {
+  title: '李さんは　中国人です',
+  titleZh: '李先生是中国人',
+  unit: '第1単元',
+  grammar_focus: '判断句 〜は〜です',
+  dialogue: [
+    { speaker:'A', name:'森', avatar:'森', side:'left',
+      jp:'はじめまして。わたしは　森です。', reading:'はじめまして。わたしは　もりです。', zh:'初次见面。我叫森。' },
+    { speaker:'B', name:'李', avatar:'李', side:'right',
+      jp:'はじめまして。わたしは　李です。中国人です。', reading:'はじめまして。わたしは　りです。ちゅうごくじんです。', zh:'初次见面。我叫李。我是中国人。' },
+    { speaker:'A', name:'森', avatar:'森', side:'left',
+      jp:'わたしは　会社員です。李さんは？', reading:'わたしは　かいしゃいんです。りさんは？', zh:'我是公司职员。李先生呢？' },
+    { speaker:'B', name:'李', avatar:'李', side:'right',
+      jp:'わたしも　会社員です。どうぞよろしく。', reading:'わたしも　かいしゃいんです。どうぞよろしく。', zh:'我也是公司职员。请多关照。' },
+    { speaker:'A', name:'森', avatar:'森', side:'left',
+      jp:'こちらこそ、よろしくお願いします。', reading:'こちらこそ、よろしくおねがいします。', zh:'哪里哪里，请多关照。' },
+  ],
+  vocab: [
+    { jp:'わたし', reading:'わたし', zh:'我', type:'代' },
+    { jp:'あなた', reading:'あなた', zh:'你', type:'代' },
+    { jp:'中国人', reading:'ちゅうごくじん', zh:'中国人', type:'名' },
+    { jp:'日本人', reading:'にほんじん', zh:'日本人', type:'名' },
+    { jp:'会社員', reading:'かいしゃいん', zh:'公司职员', type:'名' },
+    { jp:'学生', reading:'がくせい', zh:'学生', type:'名' },
+    { jp:'先生', reading:'せんせい', zh:'老师', type:'名' },
+    { jp:'医者', reading:'いしゃ', zh:'医生', type:'名' },
+    { jp:'です', reading:'です', zh:'是（判断助动词）', type:'助动' },
+    { jp:'は', reading:'は（wa）', zh:'主题助词', type:'助' },
+    { jp:'も', reading:'も', zh:'也（同样）', type:'助' },
+    { jp:'はじめまして', reading:'はじめまして', zh:'初次见面（问候语）', type:'惯' },
+    { jp:'よろしくお願いします', reading:'よろしくおねがいします', zh:'请多关照', type:'惯' },
+    { jp:'こちらこそ', reading:'こちらこそ', zh:'哪里哪里／彼此彼此', type:'惯' },
+    { jp:'どうぞ', reading:'どうぞ', zh:'请', type:'副' },
+  ],
+  grammar: [
+    { title:'〜は　〜です', pattern:'名词A は 名词B です', desc:'基本判断句，表示"A是B"。は是主题助词，读作"wa"。です是礼貌体的判断助动词，相当于中文"是"。', examples:[
+      { jp:'わたしは　李です。', zh:'我是李（先生）。' },
+      { jp:'かれは　中国人です。', zh:'他是中国人。' },
+      { jp:'森さんは　会社員です。', zh:'森先生是公司职员。' },
+    ]},
+    { title:'〜は　〜では　ありません', pattern:'名词A は 名词B では ありません', desc:'判断句的否定形式，表示"A不是B"。では（じゃ）ありません是です的否定形式。口语中常用じゃありません。', examples:[
+      { jp:'わたしは　日本人では　ありません。', zh:'我不是日本人。' },
+      { jp:'かれは　学生じゃ　ありません。', zh:'他不是学生。' },
+    ]},
+    { title:'〜も', pattern:'名词 も 〜です', desc:'助词も表示"也"，用于追加相同的说明，替换は使用。', examples:[
+      { jp:'わたしも　会社員です。', zh:'我也是公司职员。' },
+      { jp:'小野さんも　日本人です。', zh:'小野女士也是日本人。' },
+    ]},
+    { title:'〜さん', pattern:'人名／姓 + さん', desc:'さん是敬称，相当于中文的"先生/女士/小姐"，男女通用。不用于称呼自己。', examples:[
+      { jp:'森さん', zh:'森先生／森女士' },
+      { jp:'李さんは　中国人です。', zh:'李先生是中国人。' },
+    ]},
+  ]
+},
+
+l2: {
+  title: 'これは　本です',
+  titleZh: '这是书',
+  unit: '第1単元',
+  grammar_focus: '指示代词 これ・それ・あれ',
+  dialogue: [
+    { speaker:'A', name:'李', avatar:'李', side:'left',
+      jp:'これは　何ですか。', reading:'これは　なんですか。', zh:'这是什么？' },
+    { speaker:'B', name:'森', avatar:'森', side:'right',
+      jp:'それは　本です。わたしの　本です。', reading:'それは　ほんです。わたしの　ほんです。', zh:'那是书。是我的书。' },
+    { speaker:'A', name:'李', avatar:'李', side:'left',
+      jp:'あれは　何ですか。', reading:'あれは　なんですか。', zh:'那（远处）是什么？' },
+    { speaker:'B', name:'森', avatar:'森', side:'right',
+      jp:'あれは　会社の　車です。', reading:'あれは　かいしゃの　くるまです。', zh:'那是公司的车。' },
+    { speaker:'A', name:'李', avatar:'李', side:'left',
+      jp:'そうですか。きれいな　車ですね。', reading:'そうですか。きれいな　くるまですね。', zh:'是吗。真漂亮的车啊。' },
+  ],
+  vocab: [
+    { jp:'これ', reading:'これ', zh:'这个（近说话人）', type:'代' },
+    { jp:'それ', reading:'それ', zh:'那个（近听话人）', type:'代' },
+    { jp:'あれ', reading:'あれ', zh:'那个（两者都远）', type:'代' },
+    { jp:'何', reading:'なん／なに', zh:'什么', type:'代' },
+    { jp:'本', reading:'ほん', zh:'书', type:'名' },
+    { jp:'雑誌', reading:'ざっし', zh:'杂志', type:'名' },
+    { jp:'新聞', reading:'しんぶん', zh:'报纸', type:'名' },
+    { jp:'辞書', reading:'じしょ', zh:'词典', type:'名' },
+    { jp:'手帳', reading:'てちょう', zh:'记事本', type:'名' },
+    { jp:'傘', reading:'かさ', zh:'雨伞', type:'名' },
+    { jp:'鞄', reading:'かばん', zh:'包', type:'名' },
+    { jp:'車', reading:'くるま', zh:'汽车', type:'名' },
+    { jp:'の', reading:'の', zh:'的（连体助词）', type:'助' },
+    { jp:'ですか', reading:'ですか', zh:'是吗？（疑问）', type:'助动' },
+    { jp:'そうですか', reading:'そうですか', zh:'是吗／原来如此', type:'惯' },
+    { jp:'きれい', reading:'きれい', zh:'漂亮／干净', type:'形2' },
+  ],
+  grammar: [
+    { title:'これ・それ・あれ', pattern:'これ／それ／あれ は 名词 です', desc:'三个指示代词对应物品的远近关系：これ（离说话人近）、それ（离听话人近/说话人远）、あれ（离双方都远）。', examples:[
+      { jp:'これは　辞書です。', zh:'这是词典。' },
+      { jp:'それは　わたしの　手帳です。', zh:'那是我的记事本。' },
+      { jp:'あれは　会社の　車です。', zh:'那是公司的车。' },
+    ]},
+    { title:'〜の〜（连体助词）', pattern:'名词A の 名词B', desc:'の连接两个名词，表示所属或修饰关系，相当于中文"的"。', examples:[
+      { jp:'わたしの　本', zh:'我的书' },
+      { jp:'会社の　車', zh:'公司的车' },
+      { jp:'日本の　会社', zh:'日本的公司' },
+    ]},
+    { title:'〜ですか（疑问句）', pattern:'〜です → 〜ですか', desc:'在肯定句末尾加か构成疑问句，语调上扬。回答用はい（是）或いいえ（不是）。', examples:[
+      { jp:'これは　本ですか。', zh:'这是书吗？' },
+      { jp:'はい、そうです。', zh:'是的，就是。' },
+      { jp:'いいえ、ちがいます。', zh:'不，不是。' },
+    ]},
+  ]
+},
+
+l3: {
+  title: 'ここは　デパートです',
+  titleZh: '这里是百货公司',
+  unit: '第1単元',
+  grammar_focus: '场所代词 ここ・そこ・あそこ',
+  dialogue: [
+    { speaker:'A', name:'李', avatar:'李', side:'left',
+      jp:'すみません、ここは　何階ですか。', reading:'すみません、ここは　なんがいですか。', zh:'请问，这里是几楼？' },
+    { speaker:'B', name:'店员', avatar:'店', side:'right',
+      jp:'ここは　3階です。食品売り場は　地下1階です。', reading:'ここは　さんがいです。しょくひんうりばは　ちかいっかいです。', zh:'这里是3楼。食品区在地下1楼。' },
+    { speaker:'A', name:'李', avatar:'李', side:'left',
+      jp:'エレベーターは　どこですか。', reading:'エレベーターは　どこですか。', zh:'电梯在哪里？' },
+    { speaker:'B', name:'店员', avatar:'店', side:'right',
+      jp:'あそこです。あの　角を　右に　曲がってください。', reading:'あそこです。あの　かどを　みぎに　まがってください。', zh:'在那里。请在那个拐角向右转。' },
+    { speaker:'A', name:'李', avatar:'李', side:'left',
+      jp:'ありがとうございます。', reading:'ありがとうございます。', zh:'谢谢您。' },
+  ],
+  vocab: [
+    { jp:'ここ', reading:'ここ', zh:'这里（近说话人）', type:'代' },
+    { jp:'そこ', reading:'そこ', zh:'那里（近听话人）', type:'代' },
+    { jp:'あそこ', reading:'あそこ', zh:'那里（两者都远）', type:'代' },
+    { jp:'どこ', reading:'どこ', zh:'哪里', type:'代' },
+    { jp:'デパート', reading:'デパート', zh:'百货公司', type:'名' },
+    { jp:'銀行', reading:'ぎんこう', zh:'银行', type:'名' },
+    { jp:'郵便局', reading:'ゆうびんきょく', zh:'邮局', type:'名' },
+    { jp:'病院', reading:'びょういん', zh:'医院', type:'名' },
+    { jp:'学校', reading:'がっこう', zh:'学校', type:'名' },
+    { jp:'駅', reading:'えき', zh:'车站', type:'名' },
+    { jp:'エレベーター', reading:'エレベーター', zh:'电梯', type:'名' },
+    { jp:'すみません', reading:'すみません', zh:'对不起／打扰了／请问', type:'惯' },
+    { jp:'ありがとうございます', reading:'ありがとうございます', zh:'谢谢您', type:'惯' },
+    { jp:'〜階', reading:'〜かい', zh:'〜楼', type:'量' },
+    { jp:'地下', reading:'ちか', zh:'地下', type:'名' },
+  ],
+  grammar: [
+    { title:'ここ・そこ・あそこ・どこ', pattern:'場所代词 は 名词 です', desc:'场所代词与物品指示代词对应，ここ（这里）、そこ（那里）、あそこ（那里-远）、どこ（哪里）。', examples:[
+      { jp:'ここは　デパートです。', zh:'这里是百货公司。' },
+      { jp:'トイレは　そこです。', zh:'洗手间在那里。' },
+      { jp:'エレベーターは　どこですか。', zh:'电梯在哪里？' },
+    ]},
+    { title:'この・その・あの（连体指示词）', pattern:'この／その／あの + 名词', desc:'この、その、あの后面必须接名词，不能单独使用。与ここ系列对应，表示近远关系。', examples:[
+      { jp:'この　本は　わたしのです。', zh:'这本书是我的。' },
+      { jp:'あの　建物は　何ですか。', zh:'那栋楼是什么？' },
+    ]},
+    { title:'〜は　どこですか', pattern:'名词 は どこ ですか', desc:'询问场所的基本句型，どこ是疑问代词表示"哪里"。', examples:[
+      { jp:'郵便局は　どこですか。', zh:'邮局在哪里？' },
+      { jp:'トイレは　あそこです。', zh:'洗手间在那里。' },
+    ]},
+  ]
+},
+
+l4: {
+  title: '部屋に　机と　いすが　あります',
+  titleZh: '房间里有桌子和椅子',
+  unit: '第1単元',
+  grammar_focus: '存在句 あります・います',
+  dialogue: [
+    { speaker:'A', name:'森', avatar:'森', side:'left',
+      jp:'李さんの　部屋に　何が　ありますか。', reading:'りさんの　へやに　なにが　ありますか。', zh:'李先生的房间里有什么？' },
+    { speaker:'B', name:'李', avatar:'李', side:'right',
+      jp:'机と　いすと　ベッドが　あります。', reading:'つくえと　いすと　ベッドが　あります。', zh:'有桌子、椅子和床。' },
+    { speaker:'A', name:'森', avatar:'森', side:'left',
+      jp:'テレビは　ありますか。', reading:'テレビは　ありますか。', zh:'有电视吗？' },
+    { speaker:'B', name:'李', avatar:'李', side:'right',
+      jp:'いいえ、テレビは　ありません。でも、パソコンが　あります。', reading:'いいえ、テレビは　ありません。でも、パソコンが　あります。', zh:'不，没有电视。但是有电脑。' },
+    { speaker:'A', name:'森', avatar:'森', side:'left',
+      jp:'猫は　いますか。', reading:'ねこは　いますか。', zh:'有猫吗？' },
+    { speaker:'B', name:'李', avatar:'李', side:'right',
+      jp:'はい、かわいい　猫が　2匹　います。', reading:'はい、かわいい　ねこが　にひき　います。', zh:'是的，有两只可爱的猫。' },
+  ],
+  vocab: [
+    { jp:'部屋', reading:'へや', zh:'房间', type:'名' },
+    { jp:'机', reading:'つくえ', zh:'桌子', type:'名' },
+    { jp:'椅子', reading:'いす', zh:'椅子', type:'名' },
+    { jp:'ベッド', reading:'ベッド', zh:'床', type:'名' },
+    { jp:'テレビ', reading:'テレビ', zh:'电视', type:'名' },
+    { jp:'パソコン', reading:'パソコン', zh:'电脑', type:'名' },
+    { jp:'冷蔵庫', reading:'れいぞうこ', zh:'冰箱', type:'名' },
+    { jp:'猫', reading:'ねこ', zh:'猫', type:'名' },
+    { jp:'犬', reading:'いぬ', zh:'狗', type:'名' },
+    { jp:'あります', reading:'あります', zh:'有（物品/植物）', type:'动1' },
+    { jp:'います', reading:'います', zh:'有（人/动物）', type:'动2' },
+    { jp:'に', reading:'に', zh:'在（存在场所助词）', type:'助' },
+    { jp:'と', reading:'と', zh:'和（并列助词）', type:'助' },
+    { jp:'が', reading:'が', zh:'主语助词', type:'助' },
+    { jp:'でも', reading:'でも', zh:'但是', type:'接' },
+    { jp:'かわいい', reading:'かわいい', zh:'可爱的', type:'形1' },
+  ],
+  grammar: [
+    { title:'〜に　〜が　あります', pattern:'场所 に 名词 が あります', desc:'表示无生命物体（物品、植物）存在的句型。に表示存在场所，が是主语助词，あります表示存在。', examples:[
+      { jp:'部屋に　机が　あります。', zh:'房间里有桌子。' },
+      { jp:'テーブルの上に　本が　あります。', zh:'桌子上有书。' },
+      { jp:'公園に　木が　あります。', zh:'公园里有树。' },
+    ]},
+    { title:'〜に　〜が　います', pattern:'场所 に 名词 が います', desc:'表示有生命物体（人、动物）存在的句型。います与あります的区别在于指代对象是否有生命。', examples:[
+      { jp:'部屋に　猫が　います。', zh:'房间里有猫。' },
+      { jp:'教室に　学生が　います。', zh:'教室里有学生。' },
+      { jp:'公園に　子供が　います。', zh:'公园里有孩子。' },
+    ]},
+    { title:'〜と〜（并列助词）', pattern:'名词A と 名词B', desc:'と连接名词表示并列，相当于中文"和"。只用于名词之间，不用于句子之间。', examples:[
+      { jp:'机と　いすが　あります。', zh:'有桌子和椅子。' },
+      { jp:'森さんと　李さん', zh:'森先生和李先生' },
+    ]},
+    { title:'ありません・いません（否定）', pattern:'あります→ありません　います→いません', desc:'存在句的否定形式，ありません表示没有（物），いません表示没有（人/动物）。', examples:[
+      { jp:'テレビは　ありません。', zh:'没有电视。' },
+      { jp:'教室に　だれも　いません。', zh:'教室里没有任何人。' },
+    ]},
+  ]
+},
+
+intro1: {
+  title: '日语的发音',
+  titleZh: '五十音图',
+  unit: '入门单元',
+  grammar_focus: '清音・浊音・半浊音',
+  dialogue: [
+    { speaker:'A', name:'', avatar:'あ', side:'left', jp:'あ　い　う　え　お', reading:'a  i  u  e  o', zh:'行：a行（元音行）' },
+    { speaker:'A', name:'', avatar:'か', side:'left', jp:'か　き　く　け　こ', reading:'ka ki ku ke ko', zh:'行：か行' },
+    { speaker:'A', name:'', avatar:'さ', side:'left', jp:'さ　し　す　せ　そ', reading:'sa shi su se so', zh:'行：さ行' },
+    { speaker:'A', name:'', avatar:'た', side:'left', jp:'た　ち　つ　て　と', reading:'ta chi tsu te to', zh:'行：た行' },
+    { speaker:'A', name:'', avatar:'な', side:'left', jp:'な　に　ぬ　ね　の', reading:'na ni nu ne no', zh:'行：な行' },
+    { speaker:'A', name:'', avatar:'は', side:'left', jp:'は　ひ　ふ　へ　ほ', reading:'ha hi fu he ho', zh:'行：は行' },
+    { speaker:'A', name:'', avatar:'ま', side:'left', jp:'ま　み　む　め　も', reading:'ma mi mu me mo', zh:'行：ま行' },
+    { speaker:'A', name:'', avatar:'や', side:'left', jp:'や　　　ゆ　　　よ', reading:'ya     yu     yo', zh:'行：や行' },
+    { speaker:'A', name:'', avatar:'ら', side:'left', jp:'ら　り　る　れ　ろ', reading:'ra ri ru re ro', zh:'行：ら行' },
+    { speaker:'A', name:'', avatar:'わ', side:'left', jp:'わ　　　　　　　を　ん', reading:'wa          wo  n', zh:'行：わ行・ん' },
+  ],
+  vocab: [
+    { jp:'あ行', reading:'a・i・u・e・o', zh:'元音行（5个元音）', type:'音' },
+    { jp:'清音', reading:'せいおん', zh:'不浊化的基本发音', type:'音' },
+    { jp:'濁音', reading:'だくおん', zh:'浊音（加 ゛ 符号）', type:'音' },
+    { jp:'半濁音', reading:'はんだくおん', zh:'半浊音（加 ゜ 符号，仅は行）', type:'音' },
+    { jp:'拗音', reading:'ようおん', zh:'拗音（き+ゃ等组合）', type:'音' },
+    { jp:'促音', reading:'そくおん', zh:'促音（っ，双写辅音）', type:'音' },
+    { jp:'長音', reading:'ちょうおん', zh:'长音（延长一拍）', type:'音' },
+    { jp:'平仮名', reading:'ひらがな', zh:'平假名', type:'名' },
+    { jp:'片仮名', reading:'かたかな', zh:'片假名', type:'名' },
+    { jp:'漢字', reading:'かんじ', zh:'汉字', type:'名' },
+  ],
+  grammar: [
+    { title:'日语的三种文字', pattern:'平仮名・片仮名・漢字', desc:'日语书写系统由三种文字组成。平假名用于日语固有词和语法成分；片假名主要用于外来语；汉字用于词汇。', examples:[
+      { jp:'やま（山）', zh:'平假名写法（汉字：山）' },
+      { jp:'コーヒー', zh:'片假名：咖啡（Coffee）' },
+      { jp:'日本語', zh:'汉字：日语' },
+    ]},
+    { title:'浊音与半浊音', pattern:'か→が　さ→ざ　た→だ　は→ば→ぱ', desc:'在清音右上角加「゛」变为浊音，加「゜」变为半浊音（仅は行→ぱ行）。', examples:[
+      { jp:'か→が（ka→ga）', zh:'清音→浊音' },
+      { jp:'は→ば→ぱ', zh:'清音→浊音→半浊音' },
+      { jp:'さかな（魚）', zh:'鱼（清音）' },
+    ]},
+    { title:'促音（っ）', pattern:'小っ 表示停顿一拍', desc:'促音用小写的っ表示，发音时停顿一拍，相当于后面辅音的双写。', examples:[
+      { jp:'きって（切手）', zh:'邮票 ki-t-te' },
+      { jp:'ざっし（雑誌）', zh:'杂志 za-s-shi' },
+    ]},
+  ]
+},
+
+intro2: {
+  title: '日语的文字',
+  titleZh: '平假名・片假名对照',
+  unit: '入门单元',
+  grammar_focus: '平假名・片假名',
+  dialogue: [
+    { speaker:'A', name:'', avatar:'ア', side:'left', jp:'ア　イ　ウ　エ　オ', reading:'a  i  u  e  o', zh:'片假名：ア行（元音）' },
+    { speaker:'A', name:'', avatar:'カ', side:'left', jp:'カ　キ　ク　ケ　コ', reading:'ka ki ku ke ko', zh:'片假名：カ行' },
+    { speaker:'A', name:'', avatar:'サ', side:'left', jp:'サ　シ　ス　セ　ソ', reading:'sa shi su se so', zh:'片假名：サ行' },
+    { speaker:'A', name:'', avatar:'タ', side:'left', jp:'タ　チ　ツ　テ　ト', reading:'ta chi tsu te to', zh:'片假名：タ行' },
+    { speaker:'A', name:'', avatar:'ナ', side:'left', jp:'ナ　ニ　ヌ　ネ　ノ', reading:'na ni nu ne no', zh:'片假名：ナ行' },
+    { speaker:'A', name:'', avatar:'ハ', side:'left', jp:'ハ　ヒ　フ　ヘ　ホ', reading:'ha hi fu he ho', zh:'片假名：ハ行' },
+    { speaker:'A', name:'', avatar:'マ', side:'left', jp:'マ　ミ　ム　メ　モ', reading:'ma mi mu me mo', zh:'片假名：マ行' },
+    { speaker:'A', name:'', avatar:'ラ', side:'left', jp:'ラ　リ　ル　レ　ロ', reading:'ra ri ru re ro', zh:'片假名：ラ行' },
+  ],
+  vocab: [
+    { jp:'コーヒー', reading:'コーヒー', zh:'咖啡（coffee）', type:'外' },
+    { jp:'テレビ', reading:'テレビ', zh:'电视（television）', type:'外' },
+    { jp:'パソコン', reading:'パソコン', zh:'个人电脑', type:'外' },
+    { jp:'エレベーター', reading:'エレベーター', zh:'电梯（elevator）', type:'外' },
+    { jp:'レストラン', reading:'レストラン', zh:'餐厅（restaurant）', type:'外' },
+    { jp:'ホテル', reading:'ホテル', zh:'酒店（hotel）', type:'外' },
+    { jp:'スーパー', reading:'スーパー', zh:'超市（supermarket）', type:'外' },
+    { jp:'タクシー', reading:'タクシー', zh:'出租车（taxi）', type:'外' },
+    { jp:'カメラ', reading:'カメラ', zh:'相机（camera）', type:'外' },
+    { jp:'アパート', reading:'アパート', zh:'公寓（apartment）', type:'外' },
+  ],
+  grammar: [
+    { title:'片假名的用途', pattern:'外来語・外国の人名・地名・擬音語', desc:'片假名主要有四类用途：外来语（英语等借词）、外国人名地名、拟声拟态词、强调某个词语。', examples:[
+      { jp:'コーヒー（coffee）', zh:'咖啡' },
+      { jp:'ロンドン（London）', zh:'伦敦' },
+      { jp:'ワンワン', zh:'汪汪（狗叫声）' },
+    ]},
+    { title:'长音符号「ー」', pattern:'ア行长音用「ー」延长', desc:'片假名中用「ー」表示长音，延长前一个音节一拍。平假名则用对应的元音字母。', examples:[
+      { jp:'コーヒー', zh:'咖啡（ko-o-hi-i）' },
+      { jp:'エレベーター', zh:'电梯（e-re-be-e-ta-a）' },
+    ]},
+  ]
+},
+
+l5: {
+  title: '森さんは　7時に　起きます',
+  titleZh: '森先生7点起床',
+  unit: '第2単元',
+  grammar_focus: '动词ます形 · 时间表达',
+  dialogue: [
+    { speaker:'A', name:'李', avatar:'李', side:'left', jp:'森さんは　毎朝　何時に　起きますか。', reading:'もりさんは　まいあさ　なんじに　おきますか。', zh:'森先生每天早上几点起床？' },
+    { speaker:'B', name:'森', avatar:'森', side:'right', jp:'7時に　起きます。李さんは？', reading:'しちじに　おきます。りさんは？', zh:'7点起床。李先生呢？' },
+    { speaker:'A', name:'李', avatar:'李', side:'left', jp:'わたしは　6時半に　起きます。', reading:'わたしは　ろくじはんに　おきます。', zh:'我6点半起床。' },
+    { speaker:'B', name:'森', avatar:'森', side:'right', jp:'早いですね。何時に　寝ますか。', reading:'はやいですね。なんじに　ねますか。', zh:'真早啊。几点睡觉？' },
+    { speaker:'A', name:'李', avatar:'李', side:'left', jp:'だいたい　11時ごろ　寝ます。', reading:'だいたい　じゅういちじごろ　ねます。', zh:'大概11点左右睡。' },
+  ],
+  vocab: [
+    { jp:'起きます', reading:'おきます', zh:'起床', type:'动2' },
+    { jp:'寝ます', reading:'ねます', zh:'睡觉', type:'动2' },
+    { jp:'食べます', reading:'たべます', zh:'吃', type:'动2' },
+    { jp:'飲みます', reading:'のみます', zh:'喝', type:'动1' },
+    { jp:'見ます', reading:'みます', zh:'看', type:'动2' },
+    { jp:'聞きます', reading:'ききます', zh:'听', type:'动1' },
+    { jp:'毎朝', reading:'まいあさ', zh:'每天早上', type:'名' },
+    { jp:'毎晩', reading:'まいばん', zh:'每天晚上', type:'名' },
+    { jp:'毎日', reading:'まいにち', zh:'每天', type:'名' },
+    { jp:'〜時', reading:'〜じ', zh:'〜点钟', type:'量' },
+    { jp:'〜分', reading:'〜ふん／ぷん', zh:'〜分钟', type:'量' },
+    { jp:'半', reading:'はん', zh:'半（30分）', type:'名' },
+    { jp:'ごろ', reading:'ごろ', zh:'左右/大概', type:'助' },
+    { jp:'だいたい', reading:'だいたい', zh:'大概/大约', type:'副' },
+    { jp:'早い', reading:'はやい', zh:'早的/快的', type:'形1' },
+  ],
+  grammar: [
+    { title:'動詞のます形', pattern:'動詞 + ます／ません／ましたか', desc:'ます形是动词的礼貌体。现在/将来时用ます，否定用ません，过去时用ました，过去否定用ませんでした。', examples:[
+      { jp:'毎朝　ご飯を　食べます。', zh:'每天早上吃饭。' },
+      { jp:'コーヒーは　飲みません。', zh:'不喝咖啡。' },
+      { jp:'昨日　映画を　見ました。', zh:'昨天看了电影。' },
+    ]},
+    { title:'時刻の表現', pattern:'〜時　〜分　に　動詞', desc:'に是时间助词，表示动作发生的具体时间点。接在时刻、星期、日期等后面，但毎日、今日等不加に。', examples:[
+      { jp:'7時に　起きます。', zh:'7点起床。' },
+      { jp:'12時半に　昼ご飯を　食べます。', zh:'12点半吃午饭。' },
+      { jp:'毎日　運動します。（になし）', zh:'每天运动。（毎日后不加に）' },
+    ]},
+  ]
+},
+
+l6: {
+  title: '吉田さんは　来月　中国へ　行きます',
+  titleZh: '吉田先生下个月去中国',
+  unit: '第2単元',
+  grammar_focus: '移动动词 · 方向助词へ',
+  dialogue: [
+    { speaker:'A', name:'李', avatar:'李', side:'left', jp:'吉田さんは　来月　どこへ　行きますか。', reading:'よしださんは　らいげつ　どこへ　いきますか。', zh:'吉田先生下个月去哪里？' },
+    { speaker:'B', name:'吉田', avatar:'吉', side:'right', jp:'中国へ　行きます。北京と　上海へ　行きます。', reading:'ちゅうごくへ　いきます。ぺきんと　しゃんはいへ　いきます。', zh:'去中国。去北京和上海。' },
+    { speaker:'A', name:'李', avatar:'李', side:'left', jp:'何で　行きますか。', reading:'なんで　いきますか。', zh:'怎么去？' },
+    { speaker:'B', name:'吉田', avatar:'吉', side:'right', jp:'飛行機で　行きます。', reading:'ひこうきで　いきます。', zh:'坐飞机去。' },
+    { speaker:'A', name:'李', avatar:'李', side:'left', jp:'いつ　帰りますか。', reading:'いつ　かえりますか。', zh:'什么时候回来？' },
+    { speaker:'B', name:'吉田', avatar:'吉', side:'right', jp:'来月の　20日に　帰ります。', reading:'らいげつの　はつかに　かえります。', zh:'下个月20号回来。' },
+  ],
+  vocab: [
+    { jp:'行きます', reading:'いきます', zh:'去', type:'动1' },
+    { jp:'来ます', reading:'きます', zh:'来', type:'动3' },
+    { jp:'帰ります', reading:'かえります', zh:'回去/回来', type:'动1' },
+    { jp:'へ', reading:'へ（e）', zh:'向/去（方向助词）', type:'助' },
+    { jp:'で', reading:'で', zh:'用/乘坐（手段助词）', type:'助' },
+    { jp:'飛行機', reading:'ひこうき', zh:'飞机', type:'名' },
+    { jp:'電車', reading:'でんしゃ', zh:'电车', type:'名' },
+    { jp:'バス', reading:'バス', zh:'公交车', type:'名' },
+    { jp:'タクシー', reading:'タクシー', zh:'出租车', type:'名' },
+    { jp:'自転車', reading:'じてんしゃ', zh:'自行车', type:'名' },
+    { jp:'来月', reading:'らいげつ', zh:'下个月', type:'名' },
+    { jp:'先月', reading:'せんげつ', zh:'上个月', type:'名' },
+    { jp:'来年', reading:'らいねん', zh:'明年', type:'名' },
+    { jp:'去年', reading:'きょねん', zh:'去年', type:'名' },
+    { jp:'いつ', reading:'いつ', zh:'什么时候', type:'代' },
+  ],
+  grammar: [
+    { title:'〜へ　行きます／来ます／帰ります', pattern:'場所 へ 移動動詞', desc:'へ是方向助词，表示移动的方向目的地，读作"e"。に也可表示目的地，へ更强调方向感。', examples:[
+      { jp:'東京へ　行きます。', zh:'去东京。' },
+      { jp:'会社へ　来ます。', zh:'来公司。' },
+      { jp:'家へ　帰ります。', zh:'回家。' },
+    ]},
+    { title:'〜で　行きます（手段）', pattern:'交通手段 で 行きます', desc:'で接在交通工具后面，表示乘坐该交通工具，相当于"坐…去"。', examples:[
+      { jp:'電車で　行きます。', zh:'坐电车去。' },
+      { jp:'タクシーで　来ました。', zh:'坐出租车来的。' },
+      { jp:'歩いて　行きます。', zh:'步行去。' },
+    ]},
+  ]
+},
+
+l7: {
+  title: '李さんは　毎日　コーヒーを　飲みます',
+  titleZh: '李先生每天喝咖啡',
+  unit: '第2単元',
+  grammar_focus: '他动词 · 宾语助词を',
+  dialogue: [
+    { speaker:'A', name:'森', avatar:'森', side:'left', jp:'李さんは　朝ご飯を　食べますか。', reading:'りさんは　あさごはんを　たべますか。', zh:'李先生吃早饭吗？' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'はい、食べます。パンと　コーヒーを　飲みます。', reading:'はい、たべます。ぱんと　こーひーを　のみます。', zh:'是的，吃。吃面包，喝咖啡。' },
+    { speaker:'A', name:'森', avatar:'森', side:'left', jp:'昼ご飯は　どこで　食べますか。', reading:'ひるごはんは　どこで　たべますか。', zh:'午饭在哪里吃？' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'会社の　食堂で　食べます。', reading:'かいしゃの　しょくどうで　たべます。', zh:'在公司食堂吃。' },
+    { speaker:'A', name:'森', avatar:'森', side:'left', jp:'何を　食べますか。', reading:'なにを　たべますか。', zh:'吃什么？' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'たいてい　定食を　食べます。', reading:'たいてい　ていしょくを　たべます。', zh:'通常吃套餐。' },
+  ],
+  vocab: [
+    { jp:'食べます', reading:'たべます', zh:'吃', type:'动2' },
+    { jp:'飲みます', reading:'のみます', zh:'喝', type:'动1' },
+    { jp:'買います', reading:'かいます', zh:'买', type:'动1' },
+    { jp:'読みます', reading:'よみます', zh:'读/看', type:'动1' },
+    { jp:'を', reading:'を（o）', zh:'宾语助词（表示动作对象）', type:'助' },
+    { jp:'で', reading:'で', zh:'在（场所助词）', type:'助' },
+    { jp:'朝ご飯', reading:'あさごはん', zh:'早饭', type:'名' },
+    { jp:'昼ご飯', reading:'ひるごはん', zh:'午饭', type:'名' },
+    { jp:'晩ご飯', reading:'ばんごはん', zh:'晚饭', type:'名' },
+    { jp:'パン', reading:'パン', zh:'面包', type:'名' },
+    { jp:'コーヒー', reading:'コーヒー', zh:'咖啡', type:'名' },
+    { jp:'食堂', reading:'しょくどう', zh:'食堂', type:'名' },
+    { jp:'定食', reading:'ていしょく', zh:'套餐', type:'名' },
+    { jp:'たいてい', reading:'たいてい', zh:'通常/一般', type:'副' },
+    { jp:'どこで', reading:'どこで', zh:'在哪里', type:'疑' },
+  ],
+  grammar: [
+    { title:'〜を　動詞（宾语助词）', pattern:'名词 を 他動詞', desc:'を是宾语助词，接在他动词的宾语后面，表示动作的直接对象，读作"o"。', examples:[
+      { jp:'コーヒーを　飲みます。', zh:'喝咖啡。' },
+      { jp:'新聞を　読みます。', zh:'看报纸。' },
+      { jp:'何を　買いましたか。', zh:'买了什么？' },
+    ]},
+    { title:'〜で　動詞（场所助词）', pattern:'場所 で 動詞', desc:'で接在场所名词后，表示动作进行的地点，相当于"在…"。与に的区别：に表示存在地点，で表示动作地点。', examples:[
+      { jp:'食堂で　食べます。', zh:'在食堂吃。' },
+      { jp:'図書館で　勉強します。', zh:'在图书馆学习。' },
+      { jp:'どこで　買いましたか。', zh:'在哪里买的？' },
+    ]},
+  ]
+},
+
+l8: {
+  title: '李さんは　日本語で　手紙を　書きます',
+  titleZh: '李先生用日语写信',
+  unit: '第2単元',
+  grammar_focus: '手段助词で · 一起做动作',
+  dialogue: [
+    { speaker:'A', name:'小野', avatar:'小', side:'left', jp:'李さんは　何語で　話しますか。', reading:'りさんは　なにごで　はなしますか。', zh:'李先生说什么语言？' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'中国語と　日本語で　話します。', reading:'ちゅうごくごと　にほんごで　はなします。', zh:'说中文和日语。' },
+    { speaker:'A', name:'小野', avatar:'小', side:'left', jp:'日本語で　手紙を　書きますか。', reading:'にほんごで　てがみを　かきますか。', zh:'用日语写信吗？' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'はい、時々　書きます。でも、まだ　下手です。', reading:'はい、ときどき　かきます。でも、まだ　へたです。', zh:'是的，有时写。但还是写得不好。' },
+    { speaker:'A', name:'小野', avatar:'小', side:'left', jp:'一緒に　練習しましょう。', reading:'いっしょに　れんしゅうしましょう。', zh:'让我们一起练习吧。' },
+  ],
+  vocab: [
+    { jp:'書きます', reading:'かきます', zh:'写', type:'动1' },
+    { jp:'話します', reading:'はなします', zh:'说话', type:'动1' },
+    { jp:'教えます', reading:'おしえます', zh:'教', type:'动2' },
+    { jp:'練習します', reading:'れんしゅうします', zh:'练习', type:'动3' },
+    { jp:'手紙', reading:'てがみ', zh:'信', type:'名' },
+    { jp:'日本語', reading:'にほんご', zh:'日语', type:'名' },
+    { jp:'中国語', reading:'ちゅうごくご', zh:'中文', type:'名' },
+    { jp:'英語', reading:'えいご', zh:'英语', type:'名' },
+    { jp:'で', reading:'で', zh:'用（手段助词）', type:'助' },
+    { jp:'と', reading:'と', zh:'和/与（一起做）', type:'助' },
+    { jp:'一緒に', reading:'いっしょに', zh:'一起', type:'副' },
+    { jp:'時々', reading:'ときどき', zh:'有时', type:'副' },
+    { jp:'まだ', reading:'まだ', zh:'还/仍然', type:'副' },
+    { jp:'下手', reading:'へた', zh:'不擅长', type:'形2' },
+    { jp:'〜ましょう', reading:'〜ましょう', zh:'让我们〜吧（提议）', type:'助动' },
+  ],
+  grammar: [
+    { title:'〜で（手段・方法）', pattern:'手段/方法 で 動詞', desc:'で表示动作使用的手段、方法或语言，相当于"用…/以…"。', examples:[
+      { jp:'日本語で　話します。', zh:'用日语说。' },
+      { jp:'ペンで　書きます。', zh:'用钢笔写。' },
+      { jp:'はしで　食べます。', zh:'用筷子吃。' },
+    ]},
+    { title:'〜ましょう（提议）', pattern:'動詞ます形（去ます）＋ましょう', desc:'ましょう表示提议或邀请对方一起做某事，相当于"让我们…吧"。回应用ましょう或はい、そうしましょう。', examples:[
+      { jp:'一緒に　行きましょう。', zh:'让我们一起去吧。' },
+      { jp:'昼ご飯を　食べましょう。', zh:'吃午饭吧。' },
+      { jp:'日本語で　話しましょう。', zh:'用日语说吧。' },
+    ]},
+  ]
+},
+
+l9: {
+  title: '四川料理は　辛いです',
+  titleZh: '四川菜很辣',
+  unit: '第3単元',
+  grammar_focus: 'イ形容词 · ナ形容词',
+  dialogue: [
+    { speaker:'A', name:'森', avatar:'森', side:'left', jp:'四川料理は　どうですか。', reading:'しせんりょうりは　どうですか。', zh:'四川菜怎么样？' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'とても　辛いですが、おいしいですよ。', reading:'とても　からいですが、おいしいですよ。', zh:'非常辣，但很好吃哦。' },
+    { speaker:'A', name:'森', avatar:'森', side:'left', jp:'森さんは　辛い　料理が　好きですか。', reading:'もりさんは　からい　りょうりが　すきですか。', zh:'森先生喜欢辣的菜吗？' },
+    { speaker:'B', name:'森', avatar:'森', side:'right', jp:'いいえ、あまり　好きでは　ありません。', reading:'いいえ、あまり　すきでは　ありません。', zh:'不，不太喜欢。' },
+    { speaker:'A', name:'李', avatar:'李', side:'left', jp:'じゃ、日本料理は　どうですか。', reading:'じゃ、にほんりょうりは　どうですか。', zh:'那，日本料理怎么样？' },
+    { speaker:'B', name:'森', avatar:'森', side:'right', jp:'日本料理は　とても　好きです。特に　すしが　好きです。', reading:'にほんりょうりは　とても　すきです。とくに　すしが　すきです。', zh:'非常喜欢日本料理。尤其喜欢寿司。' },
+  ],
+  vocab: [
+    { jp:'辛い', reading:'からい', zh:'辣的', type:'形1' },
+    { jp:'甘い', reading:'あまい', zh:'甜的', type:'形1' },
+    { jp:'おいしい', reading:'おいしい', zh:'好吃的', type:'形1' },
+    { jp:'まずい', reading:'まずい', zh:'难吃的', type:'形1' },
+    { jp:'熱い', reading:'あつい', zh:'热的（温度）', type:'形1' },
+    { jp:'冷たい', reading:'つめたい', zh:'冷的', type:'形1' },
+    { jp:'好き', reading:'すき', zh:'喜欢', type:'形2' },
+    { jp:'嫌い', reading:'きらい', zh:'讨厌', type:'形2' },
+    { jp:'有名', reading:'ゆうめい', zh:'有名的', type:'形2' },
+    { jp:'料理', reading:'りょうり', zh:'料理/菜肴', type:'名' },
+    { jp:'とても', reading:'とても', zh:'非常', type:'副' },
+    { jp:'あまり〜ない', reading:'あまり〜ない', zh:'不太…（否定）', type:'副' },
+    { jp:'特に', reading:'とくに', zh:'尤其/特别', type:'副' },
+    { jp:'どうですか', reading:'どうですか', zh:'怎么样', type:'惯' },
+    { jp:'〜が', reading:'〜が', zh:'（表示喜好对象）', type:'助' },
+  ],
+  grammar: [
+    { title:'イ形容词', pattern:'イ形容词（〜い）+ です', desc:'い形容词词尾是い，直接加です构成礼貌体。否定形：い→くない。过去形：い→かった。', examples:[
+      { jp:'この　料理は　辛いです。', zh:'这道菜很辣。' },
+      { jp:'あまり　辛くないです。', zh:'不太辣。' },
+      { jp:'昨日は　寒かったです。', zh:'昨天很冷。' },
+    ]},
+    { title:'ナ形容词', pattern:'ナ形容词 + です　/ + な + 名词', desc:'な形容词（形容动词）词干加です。修饰名词时加な，否定形：では（じゃ）ありません。', examples:[
+      { jp:'すしが　好きです。', zh:'喜欢寿司。' },
+      { jp:'好きな　料理は　何ですか。', zh:'喜欢的料理是什么？' },
+      { jp:'有名では　ありません。', zh:'不有名。' },
+    ]},
+  ]
+},
+
+l10: {
+  title: '京都の　紅葉は　有名です',
+  titleZh: '京都的红叶很有名',
+  unit: '第3単元',
+  grammar_focus: '形容词修饰名词 · どんな',
+  dialogue: [
+    { speaker:'A', name:'李', avatar:'李', side:'left', jp:'京都は　どんな　町ですか。', reading:'きょうとは　どんな　まちですか。', zh:'京都是什么样的城市？' },
+    { speaker:'B', name:'小野', avatar:'小', side:'right', jp:'古くて　きれいな　町です。お寺や　神社が　たくさん　あります。', reading:'ふるくて　きれいな　まちです。おてらや　じんじゃが　たくさん　あります。', zh:'是个古老而美丽的城市。有很多寺庙和神社。' },
+    { speaker:'A', name:'李', avatar:'李', side:'left', jp:'紅葉が　有名ですね。いつ　きれいですか。', reading:'もみじが　ゆうめいですね。いつ　きれいですか。', zh:'红叶很有名吧。什么时候最美？' },
+    { speaker:'B', name:'小野', avatar:'小', side:'right', jp:'11月が　一番　きれいです。', reading:'じゅういちがつが　いちばん　きれいです。', zh:'11月最美。' },
+    { speaker:'A', name:'李', avatar:'李', side:'left', jp:'ぜひ　行きたいです。', reading:'ぜひ　いきたいです。', zh:'真想去看看。' },
+  ],
+  vocab: [
+    { jp:'紅葉', reading:'もみじ／こうよう', zh:'红叶', type:'名' },
+    { jp:'お寺', reading:'おてら', zh:'寺庙', type:'名' },
+    { jp:'神社', reading:'じんじゃ', zh:'神社', type:'名' },
+    { jp:'町', reading:'まち', zh:'城镇/街道', type:'名' },
+    { jp:'古い', reading:'ふるい', zh:'古老的', type:'形1' },
+    { jp:'新しい', reading:'あたらしい', zh:'新的', type:'形1' },
+    { jp:'きれい', reading:'きれい', zh:'漂亮的/干净的', type:'形2' },
+    { jp:'便利', reading:'べんり', zh:'方便的', type:'形2' },
+    { jp:'静か', reading:'しずか', zh:'安静的', type:'形2' },
+    { jp:'賑やか', reading:'にぎやか', zh:'热闹的', type:'形2' },
+    { jp:'たくさん', reading:'たくさん', zh:'很多', type:'副' },
+    { jp:'一番', reading:'いちばん', zh:'最', type:'副' },
+    { jp:'ぜひ', reading:'ぜひ', zh:'一定/务必', type:'副' },
+    { jp:'どんな', reading:'どんな', zh:'什么样的', type:'连体' },
+    { jp:'や', reading:'や', zh:'和等（不完全列举）', type:'助' },
+  ],
+  grammar: [
+    { title:'どんな＋名词', pattern:'どんな + 名词 + ですか', desc:'どんな询问事物的性质或特征，相当于"什么样的"。回答用形容词或形容词+名词。', examples:[
+      { jp:'どんな　町ですか。', zh:'什么样的城市？' },
+      { jp:'静かで　きれいな　町です。', zh:'是安静而美丽的城市。' },
+    ]},
+    { title:'〜くて／〜で（形容词连用）', pattern:'イ形容词：〜くて　　ナ形容词：〜で', desc:'连接两个形容词时，い形容词变くて，な形容词词干加で，相当于"…而且…"。', examples:[
+      { jp:'古くて　きれいな　町です。', zh:'古老而美丽的城市。' },
+      { jp:'静かで　便利な　場所です。', zh:'安静而方便的地方。' },
+    ]},
+    { title:'〜が　一番〜', pattern:'〜の中で　何が　一番　〜ですか', desc:'一番表示"最"，用于比较三者以上，与が一起构成"最…"的句型。', examples:[
+      { jp:'11月が　一番　きれいです。', zh:'11月最美。' },
+      { jp:'何が　一番　好きですか。', zh:'最喜欢什么？' },
+    ]},
+  ]
+},
+
+l11: {
+  title: '小野さんは　歌が　好きです',
+  titleZh: '小野女士喜欢唱歌',
+  unit: '第3単元',
+  grammar_focus: '好き・嫌い・上手・下手 + が',
+  dialogue: [
+    { speaker:'A', name:'李', avatar:'李', side:'left', jp:'小野さんは　趣味は　何ですか。', reading:'おのさんは　しゅみは　なんですか。', zh:'小野女士，你的爱好是什么？' },
+    { speaker:'B', name:'小野', avatar:'小', side:'right', jp:'歌が　好きです。カラオケが　大好きです。', reading:'うたが　すきです。からおけが　だいすきです。', zh:'喜欢唱歌。非常喜欢卡拉OK。' },
+    { speaker:'A', name:'李', avatar:'李', side:'left', jp:'上手ですか。', reading:'じょうずですか。', zh:'唱得好吗？' },
+    { speaker:'B', name:'小野', avatar:'小', side:'right', jp:'いいえ、あまり　上手では　ありません。でも　楽しいです。', reading:'いいえ、あまり　じょうずでは　ありません。でも　たのしいです。', zh:'不，不太好。但很开心。' },
+    { speaker:'A', name:'李', avatar:'李', side:'left', jp:'李さんは　何か　スポーツが　得意ですか。', reading:'りさんは　なにか　すぽーつが　とくいですか。', zh:'李先生，你擅长什么运动吗？' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'卓球が　得意です。中国では　有名な　スポーツです。', reading:'たっきゅうが　とくいです。ちゅうごくでは　ゆうめいな　すぽーつです。', zh:'擅长乒乓球。在中国是很有名的运动。' },
+  ],
+  vocab: [
+    { jp:'好き', reading:'すき', zh:'喜欢', type:'形2' },
+    { jp:'大好き', reading:'だいすき', zh:'非常喜欢', type:'形2' },
+    { jp:'嫌い', reading:'きらい', zh:'讨厌', type:'形2' },
+    { jp:'上手', reading:'じょうず', zh:'擅长/做得好', type:'形2' },
+    { jp:'下手', reading:'へた', zh:'不擅长', type:'形2' },
+    { jp:'得意', reading:'とくい', zh:'拿手/擅长', type:'形2' },
+    { jp:'苦手', reading:'にがて', zh:'不擅长/害怕', type:'形2' },
+    { jp:'趣味', reading:'しゅみ', zh:'爱好', type:'名' },
+    { jp:'歌', reading:'うた', zh:'歌曲', type:'名' },
+    { jp:'音楽', reading:'おんがく', zh:'音乐', type:'名' },
+    { jp:'スポーツ', reading:'スポーツ', zh:'运动', type:'名' },
+    { jp:'卓球', reading:'たっきゅう', zh:'乒乓球', type:'名' },
+    { jp:'楽しい', reading:'たのしい', zh:'开心的/快乐的', type:'形1' },
+    { jp:'何か', reading:'なにか', zh:'什么/某事', type:'代' },
+    { jp:'が', reading:'が', zh:'（好き・上手等的对象助词）', type:'助' },
+  ],
+  grammar: [
+    { title:'好き・嫌い・上手・下手 + が', pattern:'名词 が 好き／嫌い／上手／下手 です', desc:'表示喜好、好恶和能力的な形容词使用が而非を作为助词，这是日语的特殊用法。', examples:[
+      { jp:'音楽が　好きです。', zh:'喜欢音乐。' },
+      { jp:'野菜が　嫌いです。', zh:'讨厌蔬菜。' },
+      { jp:'英語が　上手ですね。', zh:'英语说得很好呢。' },
+    ]},
+  ]
+},
+
+l12: {
+  title: '李さんは　森さんより　若いです',
+  titleZh: '李先生比森先生年轻',
+  unit: '第3単元',
+  grammar_focus: '比较句型 より・のほうが',
+  dialogue: [
+    { speaker:'A', name:'小野', avatar:'小', side:'left', jp:'李さんと　森さんと、どちらが　若いですか。', reading:'りさんと　もりさんと、どちらが　わかいですか。', zh:'李先生和森先生，哪个更年轻？' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'李さんの　ほうが　若いです。', reading:'りさんの　ほうが　わかいです。', zh:'李先生更年轻。' },
+    { speaker:'A', name:'小野', avatar:'小', side:'left', jp:'東京と　大阪と、どちらが　大きいですか。', reading:'とうきょうと　おおさかと、どちらが　おおきいですか。', zh:'东京和大阪，哪个更大？' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'東京の　ほうが　大きいです。でも、大阪の　ほうが　食べ物が　おいしいです。', reading:'とうきょうの　ほうが　おおきいです。でも、おおさかの　ほうが　たべものが　おいしいです。', zh:'东京更大。但大阪的食物更好吃。' },
+    { speaker:'A', name:'小野', avatar:'小', side:'left', jp:'三つの中で　何が　一番　好きですか。', reading:'みっつのなかで　なにが　いちばん　すきですか。', zh:'三个里面最喜欢哪个？' },
+  ],
+  vocab: [
+    { jp:'より', reading:'より', zh:'比（比较助词）', type:'助' },
+    { jp:'のほうが', reading:'のほうが', zh:'…的一方更…', type:'助' },
+    { jp:'どちら', reading:'どちら', zh:'哪个（二选一）', type:'代' },
+    { jp:'どれ', reading:'どれ', zh:'哪个（三个以上）', type:'代' },
+    { jp:'若い', reading:'わかい', zh:'年轻的', type:'形1' },
+    { jp:'大きい', reading:'おおきい', zh:'大的', type:'形1' },
+    { jp:'小さい', reading:'ちいさい', zh:'小的', type:'形1' },
+    { jp:'高い', reading:'たかい', zh:'高的/贵的', type:'形1' },
+    { jp:'安い', reading:'やすい', zh:'便宜的', type:'形1' },
+    { jp:'遠い', reading:'とおい', zh:'远的', type:'形1' },
+    { jp:'近い', reading:'ちかい', zh:'近的', type:'形1' },
+    { jp:'同じ', reading:'おなじ', zh:'相同的', type:'形' },
+    { jp:'〜の中で', reading:'〜のなかで', zh:'在…之中', type:'惯' },
+    { jp:'一番', reading:'いちばん', zh:'最', type:'副' },
+    { jp:'食べ物', reading:'たべもの', zh:'食物/食品', type:'名' },
+  ],
+  grammar: [
+    { title:'AはBより〜です', pattern:'A は B より 形容词 です', desc:'より是比较助词，相当于中文"比"。表示A比B更…，より前面的是比较对象。', examples:[
+      { jp:'李さんは　森さんより　若いです。', zh:'李先生比森先生年轻。' },
+      { jp:'東京は　大阪より　大きいです。', zh:'东京比大阪大。' },
+      { jp:'バスより　電車の　ほうが　速いです。', zh:'电车比公交车快。' },
+    ]},
+    { title:'AとBと、どちらが〜ですか', pattern:'A と B と どちらが〜ですか → Aのほうが〜です', desc:'二择一的比较疑问句，どちら是哪个（两者之一），回答用のほうが表示哪一方更…。', examples:[
+      { jp:'コーヒーと　紅茶と、どちらが　好きですか。', zh:'咖啡和红茶，哪个更喜欢？' },
+      { jp:'紅茶の　ほうが　好きです。', zh:'更喜欢红茶。' },
+    ]},
+  ]
+},
+
+l13: {
+  title: '机の　上に　本が　3冊　あります',
+  titleZh: '桌上有3本书',
+  unit: '第4単元',
+  grammar_focus: '数量词 · 助数词',
+  dialogue: [
+    { speaker:'A', name:'吉田', avatar:'吉', side:'left', jp:'李さんの　机の　上に　何が　ありますか。', reading:'りさんの　つくえの　うえに　なにが　ありますか。', zh:'李先生桌上有什么？' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'本が　3冊と　ノートが　2冊　あります。', reading:'ほんが　さんさつと　のーとが　にさつ　あります。', zh:'有3本书和2本笔记本。' },
+    { speaker:'A', name:'吉田', avatar:'吉', side:'left', jp:'鉛筆は　何本　ありますか。', reading:'えんぴつは　なんぼん　ありますか。', zh:'有几支铅笔？' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'5本　あります。それから、消しゴムが　1個　あります。', reading:'ごほん　あります。それから、けしごむが　いっこ　あります。', zh:'有5支。还有1块橡皮。' },
+    { speaker:'A', name:'吉田', avatar:'吉', side:'left', jp:'机の　引き出しの　中に　何が　入って　いますか。', reading:'つくえの　ひきだしの　なかに　なにが　はいって　いますか。', zh:'桌子抽屉里面有什么？' },
+  ],
+  vocab: [
+    { jp:'〜冊', reading:'〜さつ', zh:'〜本（书本、笔记本）', type:'量' },
+    { jp:'〜本', reading:'〜ほん／ぼん', zh:'〜支/根（细长物）', type:'量' },
+    { jp:'〜個', reading:'〜こ', zh:'〜个（小物品）', type:'量' },
+    { jp:'〜枚', reading:'〜まい', zh:'〜张（薄平物）', type:'量' },
+    { jp:'〜台', reading:'〜だい', zh:'〜台（机器）', type:'量' },
+    { jp:'〜人', reading:'〜にん／り', zh:'〜个人', type:'量' },
+    { jp:'〜匹', reading:'〜ひき', zh:'〜只（小动物）', type:'量' },
+    { jp:'〜頭', reading:'〜とう', zh:'〜头（大动物）', type:'量' },
+    { jp:'ノート', reading:'ノート', zh:'笔记本', type:'名' },
+    { jp:'鉛筆', reading:'えんぴつ', zh:'铅笔', type:'名' },
+    { jp:'消しゴム', reading:'けしごむ', zh:'橡皮', type:'名' },
+    { jp:'引き出し', reading:'ひきだし', zh:'抽屉', type:'名' },
+    { jp:'上', reading:'うえ', zh:'上面', type:'名' },
+    { jp:'中', reading:'なか', zh:'里面', type:'名' },
+    { jp:'それから', reading:'それから', zh:'然后/还有', type:'接' },
+  ],
+  grammar: [
+    { title:'数量词的位置', pattern:'名词 が 数量 あります／います', desc:'日语数量词通常放在动词前，格式为：名词が＋数量＋动词。数量词不需要助词。', examples:[
+      { jp:'本が　3冊　あります。', zh:'有3本书。' },
+      { jp:'学生が　20人　います。', zh:'有20个学生。' },
+      { jp:'りんごを　3個　買いました。', zh:'买了3个苹果。' },
+    ]},
+    { title:'主要助数词', pattern:'〜冊・本・枚・個・台・人・匹', desc:'日语助数词根据物体种类而不同，类似中文的量词。需要记住每类物品对应的量词。', examples:[
+      { jp:'紙　3枚', zh:'3张纸' },
+      { jp:'犬　2匹', zh:'2只狗' },
+      { jp:'車　1台', zh:'1辆车' },
+    ]},
+  ]
+},
+
+l14: {
+  title: '昨日　デパートへ　行って、買い物しました',
+  titleZh: '昨天去百货公司买东西了',
+  unit: '第4単元',
+  grammar_focus: '动词て形 · 过去时',
+  dialogue: [
+    { speaker:'A', name:'森', avatar:'森', side:'left', jp:'昨日　何を　しましたか。', reading:'きのう　なにを　しましたか。', zh:'昨天做了什么？' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'デパートへ　行って、服を　買いました。', reading:'でぱーとへ　いって、ふくを　かいました。', zh:'去了百货公司，买了衣服。' },
+    { speaker:'A', name:'森', avatar:'森', side:'left', jp:'どんな　服を　買いましたか。', reading:'どんな　ふくを　かいましたか。', zh:'买了什么样的衣服？' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'スーツを　1着　買いました。ちょっと　高かったです。', reading:'すーつを　いちちゃく　かいました。ちょっと　たかかったです。', zh:'买了一套西装。稍微有点贵。' },
+    { speaker:'A', name:'森', avatar:'森', side:'left', jp:'その　あと、どこかへ　行きましたか。', reading:'その　あと、どこかへ　いきましたか。', zh:'之后，又去哪里了吗？' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'レストランで　食事して、家へ　帰りました。', reading:'れすとらんで　しょくじして、いえへ　かえりました。', zh:'在餐厅吃了饭，回家了。' },
+  ],
+  vocab: [
+    { jp:'昨日', reading:'きのう', zh:'昨天', type:'名' },
+    { jp:'今日', reading:'きょう', zh:'今天', type:'名' },
+    { jp:'明日', reading:'あした', zh:'明天', type:'名' },
+    { jp:'服', reading:'ふく', zh:'衣服', type:'名' },
+    { jp:'スーツ', reading:'スーツ', zh:'西装', type:'名' },
+    { jp:'食事', reading:'しょくじ', zh:'饮食/用餐', type:'名' },
+    { jp:'買い物', reading:'かいもの', zh:'购物', type:'名' },
+    { jp:'〜て（て形）', reading:'〜て', zh:'动词て形（连接动作）', type:'助动' },
+    { jp:'ちょっと', reading:'ちょっと', zh:'稍微/有点', type:'副' },
+    { jp:'その後', reading:'そのあと', zh:'之后', type:'接' },
+    { jp:'どこか', reading:'どこか', zh:'某处/哪里', type:'代' },
+    { jp:'高かった', reading:'たかかった', zh:'贵的（过去形）', type:'形1過' },
+    { jp:'〜着', reading:'〜ちゃく', zh:'〜套（衣服）', type:'量' },
+    { jp:'〜ました', reading:'〜ました', zh:'做了…（过去时）', type:'助动' },
+    { jp:'〜ませんでした', reading:'〜ませんでした', zh:'没有做…（过去否定）', type:'助动' },
+  ],
+  grammar: [
+    { title:'動詞のて形（连接动作）', pattern:'動詞て形 + 動詞', desc:'て形连接两个动作，表示先做前者再做后者，或两个动作的连续。构成规则根据动词组别不同。', examples:[
+      { jp:'デパートへ　行って、買い物しました。', zh:'去了百货公司，买了东西。' },
+      { jp:'シャワーを　浴びて、寝ました。', zh:'洗了澡，睡了。' },
+      { jp:'コーヒーを　飲んで、新聞を　読みます。', zh:'喝咖啡，看报纸。' },
+    ]},
+    { title:'過去形〜ました／〜ませんでした', pattern:'ます→ました　ません→ませんでした', desc:'ます形变过去时只需将ます改为ました，否定ません改为ませんでした。', examples:[
+      { jp:'昨日　映画を　見ました。', zh:'昨天看了电影。' },
+      { jp:'朝ご飯を　食べませんでした。', zh:'没吃早饭。' },
+    ]},
+  ]
+},
+
+l15: {
+  title: '小野さんは　今　新聞を　読んで　います',
+  titleZh: '小野女士现在正在读报纸',
+  unit: '第4単元',
+  grammar_focus: '〜ています（进行/状态）',
+  dialogue: [
+    { speaker:'A', name:'李', avatar:'李', side:'left', jp:'小野さんは　今　何を　して　いますか。', reading:'おのさんは　いま　なにを　して　いますか。', zh:'小野女士现在在做什么？' },
+    { speaker:'B', name:'森', avatar:'森', side:'right', jp:'新聞を　読んで　います。', reading:'しんぶんを　よんで　います。', zh:'正在读报纸。' },
+    { speaker:'A', name:'李', avatar:'李', side:'left', jp:'吉田さんは　どこに　いますか。', reading:'よしださんは　どこに　いますか。', zh:'吉田先生在哪里？' },
+    { speaker:'B', name:'森', avatar:'森', side:'right', jp:'会議室に　います。今　会議を　して　います。', reading:'かいぎしつに　います。いま　かいぎを　して　います。', zh:'在会议室。现在正在开会。' },
+    { speaker:'A', name:'李', avatar:'李', side:'left', jp:'森さんは　結婚して　いますか。', reading:'もりさんは　けっこんして　いますか。', zh:'森先生结婚了吗？' },
+    { speaker:'B', name:'森', avatar:'森', side:'right', jp:'はい、結婚して　います。子供が　2人　います。', reading:'はい、けっこんして　います。こどもが　ふたり　います。', zh:'是的，结婚了。有2个孩子。' },
+  ],
+  vocab: [
+    { jp:'〜ています', reading:'〜ています', zh:'正在…/已经…（状态）', type:'助动' },
+    { jp:'読んでいます', reading:'よんでいます', zh:'正在读', type:'动' },
+    { jp:'話しています', reading:'はなしています', zh:'正在说话', type:'动' },
+    { jp:'結婚しています', reading:'けっこんしています', zh:'已婚（状态）', type:'动' },
+    { jp:'住んでいます', reading:'すんでいます', zh:'住在（状态）', type:'动' },
+    { jp:'働いています', reading:'はたらいています', zh:'工作中（状态）', type:'动' },
+    { jp:'今', reading:'いま', zh:'现在', type:'名' },
+    { jp:'会議', reading:'かいぎ', zh:'会议', type:'名' },
+    { jp:'会議室', reading:'かいぎしつ', zh:'会议室', type:'名' },
+    { jp:'結婚', reading:'けっこん', zh:'结婚', type:'名' },
+    { jp:'子供', reading:'こども', zh:'孩子', type:'名' },
+    { jp:'〜人', reading:'〜り／にん', zh:'〜个人', type:'量' },
+    { jp:'ひとり', reading:'ひとり', zh:'1个人', type:'量' },
+    { jp:'ふたり', reading:'ふたり', zh:'2个人', type:'量' },
+    { jp:'どこに', reading:'どこに', zh:'在哪里（存在）', type:'疑' },
+  ],
+  grammar: [
+    { title:'〜ています（進行）', pattern:'動詞て形 + います', desc:'ています有两个主要用法：①表示动作正在进行；②表示动作结果的持续状态。需要根据语境判断。', examples:[
+      { jp:'今　新聞を　読んで　います。', zh:'现在正在读报纸。（进行）' },
+      { jp:'結婚して　います。', zh:'已经结婚了。（状态）' },
+      { jp:'東京に　住んで　います。', zh:'住在东京。（状态）' },
+    ]},
+  ]
+},
+
+l16: {
+  title: 'ホテルの　部屋は　広くて　明るいです',
+  titleZh: '酒店的房间宽敞明亮',
+  unit: '第4単元',
+  grammar_focus: '形容词て形连接 · 程度副词',
+  dialogue: [
+    { speaker:'A', name:'李', avatar:'李', side:'left', jp:'ホテルの　部屋は　どうでしたか。', reading:'ほてるの　へやは　どうでしたか。', zh:'酒店的房间怎么样？' },
+    { speaker:'B', name:'吉田', avatar:'吉', side:'right', jp:'広くて　明るくて、とても　よかったです。', reading:'ひろくて　あかるくて、とても　よかったです。', zh:'宽敞明亮，非常好。' },
+    { speaker:'A', name:'李', avatar:'李', side:'left', jp:'眺めは　どうでしたか。', reading:'ながめは　どうでしたか。', zh:'景色怎么样？' },
+    { speaker:'B', name:'吉田', avatar:'吉', side:'right', jp:'海が　見えて、すばらしかったです。', reading:'うみが　みえて、すばらしかったです。', zh:'能看到大海，非常壮观。' },
+    { speaker:'A', name:'李', avatar:'李', side:'left', jp:'サービスは　よかったですか。', reading:'さーびすは　よかったですか。', zh:'服务好吗？' },
+    { speaker:'B', name:'吉田', avatar:'吉', side:'right', jp:'はい、スタッフが　親切で　サービスも　よかったです。', reading:'はい、すたっふが　しんせつで　さーびすも　よかったです。', zh:'是的，员工很亲切，服务也很好。' },
+  ],
+  vocab: [
+    { jp:'広い', reading:'ひろい', zh:'宽敞的', type:'形1' },
+    { jp:'狭い', reading:'せまい', zh:'狭窄的', type:'形1' },
+    { jp:'明るい', reading:'あかるい', zh:'明亮的', type:'形1' },
+    { jp:'暗い', reading:'くらい', zh:'黑暗的', type:'形1' },
+    { jp:'よい／いい', reading:'よい／いい', zh:'好的', type:'形1' },
+    { jp:'悪い', reading:'わるい', zh:'坏的', type:'形1' },
+    { jp:'すばらしい', reading:'すばらしい', zh:'了不起的/壮观的', type:'形1' },
+    { jp:'親切', reading:'しんせつ', zh:'亲切的', type:'形2' },
+    { jp:'眺め', reading:'ながめ', zh:'景色/眺望', type:'名' },
+    { jp:'海', reading:'うみ', zh:'大海', type:'名' },
+    { jp:'サービス', reading:'サービス', zh:'服务', type:'名' },
+    { jp:'スタッフ', reading:'スタッフ', zh:'员工/工作人员', type:'名' },
+    { jp:'どうでしたか', reading:'どうでしたか', zh:'怎么样（过去）', type:'惯' },
+    { jp:'よかった', reading:'よかった', zh:'好的（过去形）', type:'形1過' },
+    { jp:'見えます', reading:'みえます', zh:'看得见', type:'动2' },
+  ],
+  grammar: [
+    { title:'イ形容词て形（〜くて）', pattern:'い形容词 い→くて + 続く', desc:'い形容词连接时去い加くて，可以连接多个形容词，最后一个用正常形式。', examples:[
+      { jp:'広くて　明るい　部屋です。', zh:'宽敞明亮的房间。' },
+      { jp:'安くて　おいしい　レストランです。', zh:'便宜又好吃的餐厅。' },
+    ]},
+    { title:'ナ形容词て形（〜で）', pattern:'な形容词 词干 + で + 続く', desc:'な形容词连接时词干直接加で，与い形容词的くて用法相同。', examples:[
+      { jp:'親切で　サービスも　いいです。', zh:'亲切，服务也好。' },
+      { jp:'静かで　きれいな　町です。', zh:'安静又美丽的城市。' },
+    ]},
+  ]
+},
+
+l17: {
+  title: 'わたしは　新しい　洋服が　欲しいです',
+  titleZh: '我想要新衣服',
+  unit: '第5単元',
+  grammar_focus: '欲しい · 〜たいです',
+  dialogue: [
+    { speaker:'A', name:'小野', avatar:'小', side:'left', jp:'お正月に　何か　欲しいものは　ありますか。', reading:'おしょうがつに　なにか　ほしいものは　ありますか。', zh:'新年有什么想要的东西吗？' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'新しい　洋服が　欲しいです。あと、カメラも　欲しいです。', reading:'あたらしい　ようふくが　ほしいです。あと、かめらも　ほしいです。', zh:'想要新衣服。还想要相机。' },
+    { speaker:'A', name:'小野', avatar:'小', side:'left', jp:'どんな　カメラが　欲しいですか。', reading:'どんな　かめらが　ほしいですか。', zh:'想要什么样的相机？' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'小さくて　軽い　カメラが　欲しいです。日本の　景色を　撮りたいです。', reading:'ちいさくて　かるい　かめらが　ほしいです。にほんの　けしきを　とりたいです。', zh:'想要小巧轻便的相机。想拍日本的风景。' },
+    { speaker:'A', name:'小野', avatar:'小', side:'left', jp:'どこへ　行きたいですか。', reading:'どこへ　いきたいですか。', zh:'想去哪里？' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'京都と　北海道へ　行きたいです。', reading:'きょうとと　ほっかいどうへ　いきたいです。', zh:'想去京都和北海道。' },
+  ],
+  vocab: [
+    { jp:'欲しい', reading:'ほしい', zh:'想要（物品）', type:'形1' },
+    { jp:'〜たい', reading:'〜たい', zh:'想做…（动作愿望）', type:'助动' },
+    { jp:'洋服', reading:'ようふく', zh:'衣服（西式）', type:'名' },
+    { jp:'カメラ', reading:'カメラ', zh:'相机', type:'名' },
+    { jp:'景色', reading:'けしき', zh:'风景', type:'名' },
+    { jp:'軽い', reading:'かるい', zh:'轻的', type:'形1' },
+    { jp:'重い', reading:'おもい', zh:'重的', type:'形1' },
+    { jp:'撮ります', reading:'とります', zh:'拍摄/拍照', type:'动1' },
+    { jp:'お正月', reading:'おしょうがつ', zh:'新年/元旦', type:'名' },
+    { jp:'北海道', reading:'ほっかいどう', zh:'北海道', type:'专' },
+    { jp:'あと', reading:'あと', zh:'还有/另外', type:'接' },
+    { jp:'何か', reading:'なにか', zh:'什么/某样东西', type:'代' },
+    { jp:'もの', reading:'もの', zh:'东西/物品', type:'名' },
+    { jp:'が（欲しい）', reading:'が', zh:'（欲しい的对象助词）', type:'助' },
+    { jp:'を（〜たい）', reading:'を', zh:'（〜たい的对象助词）', type:'助' },
+  ],
+  grammar: [
+    { title:'〜が　欲しいです', pattern:'名词 が 欲しいです', desc:'欲しい表示"想要（某物）"，是い形容词。对象用が，不用を。否定用欲しくないです。', examples:[
+      { jp:'新しい　カメラが　欲しいです。', zh:'想要新相机。' },
+      { jp:'何も　欲しくないです。', zh:'什么都不想要。' },
+    ]},
+    { title:'〜を　〜たいです', pattern:'動詞ます形（去ます）＋たいです', desc:'たい接在动词ます形（去ます）后，表示说话人自己的愿望"想做…"。对象用を。', examples:[
+      { jp:'日本の　景色を　撮りたいです。', zh:'想拍日本的风景。' },
+      { jp:'どこへ　行きたいですか。', zh:'想去哪里？' },
+      { jp:'何も　食べたく　ないです。', zh:'什么都不想吃。' },
+    ]},
+  ]
+},
+
+l18: {
+  title: '携帯電話は　とても　小さく　なりました',
+  titleZh: '手机变得非常小了',
+  unit: '第5単元',
+  grammar_focus: '〜くなります・〜になります（变化）',
+  dialogue: [
+    { speaker:'A', name:'森', avatar:'森', side:'left', jp:'最近、携帯電話は　便利に　なりましたね。', reading:'さいきん、けいたいでんわは　べんりに　なりましたね。', zh:'最近手机变得很方便了呢。' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'そうですね。小さくて　軽くなりましたし、高機能に　なりました。', reading:'そうですね。ちいさくて　かるくなりましたし、こうきのうに　なりました。', zh:'是啊。变小变轻了，而且功能也变多了。' },
+    { speaker:'A', name:'森', avatar:'森', side:'left', jp:'李さんの　日本語も　上手に　なりましたよ。', reading:'りさんの　にほんごも　じょうずに　なりましたよ。', zh:'李先生的日语也进步了呢。' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'ありがとうございます。毎日　勉強して、少しずつ　上手に　なりたいです。', reading:'ありがとうございます。まいにち　べんきょうして、すこしずつ　じょうずに　なりたいです。', zh:'谢谢。每天学习，想一点一点进步。' },
+  ],
+  vocab: [
+    { jp:'〜くなります', reading:'〜くなります', zh:'变得…（イ形容词变化）', type:'动' },
+    { jp:'〜になります', reading:'〜になります', zh:'变得…（ナ形容词/名词变化）', type:'动' },
+    { jp:'携帯電話', reading:'けいたいでんわ', zh:'手机', type:'名' },
+    { jp:'最近', reading:'さいきん', zh:'最近', type:'名' },
+    { jp:'便利', reading:'べんり', zh:'方便的', type:'形2' },
+    { jp:'高機能', reading:'こうきのう', zh:'高功能/多功能', type:'名' },
+    { jp:'勉強します', reading:'べんきょうします', zh:'学习', type:'动3' },
+    { jp:'少しずつ', reading:'すこしずつ', zh:'一点一点地', type:'副' },
+    { jp:'〜し', reading:'〜し', zh:'而且/并且（列举理由）', type:'助' },
+    { jp:'〜ね', reading:'〜ね', zh:'呢/对吗（求同意）', type:'助' },
+    { jp:'〜よ', reading:'〜よ', zh:'哦/呀（告知）', type:'助' },
+    { jp:'軽くなる', reading:'かるくなる', zh:'变轻', type:'动' },
+    { jp:'上手になる', reading:'じょうずになる', zh:'变得擅长/进步', type:'动' },
+    { jp:'有名になる', reading:'ゆうめいになる', zh:'变得有名', type:'动' },
+    { jp:'医者になる', reading:'いしゃになる', zh:'成为医生', type:'动' },
+  ],
+  grammar: [
+    { title:'〜くなります（イ形容词变化）', pattern:'イ形容词 い→く + なります', desc:'表示状态的变化"变得…"。い形容词去い加く再加なります，な形容词和名词直接加になります。', examples:[
+      { jp:'携帯電話が　小さくなりました。', zh:'手机变小了。' },
+      { jp:'日本語が　上手になりたいです。', zh:'想让日语变好。' },
+      { jp:'天気が　よくなりました。', zh:'天气变好了。' },
+    ]},
+    { title:'〜になります（ナ形容词・名词变化）', pattern:'ナ形容词词干／名词 + になります', desc:'ナ形容词和名词变化用になります，表示变成某种状态或变成某种身份职业。', examples:[
+      { jp:'便利に　なりました。', zh:'变方便了。' },
+      { jp:'医者に　なりたいです。', zh:'想成为医生。' },
+      { jp:'春に　なりました。', zh:'变成春天了。' },
+    ]},
+  ]
+},
+
+l19: {
+  title: '部屋の　かぎを　忘れないで　ください',
+  titleZh: '请不要忘了房间的钥匙',
+  unit: '第5単元',
+  grammar_focus: '〜てください · 〜ないでください',
+  dialogue: [
+    { speaker:'A', name:'吉田', avatar:'吉', side:'left', jp:'明日の　会議の　準備を　して　ください。', reading:'あしたの　かいぎの　じゅんびを　して　ください。', zh:'请准备明天的会议。' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'はい、わかりました。何時に　始まりますか。', reading:'はい、わかりました。なんじに　はじまりますか。', zh:'好的，明白了。几点开始？' },
+    { speaker:'A', name:'吉田', avatar:'吉', side:'left', jp:'9時に　始まります。遅刻しないで　ください。', reading:'くじに　はじまります。ちこくしないで　ください。', zh:'9点开始。请不要迟到。' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'はい。資料は　何枚　コピーしますか。', reading:'はい。しりょうは　なんまい　こぴーしますか。', zh:'好的。资料复印几份？' },
+    { speaker:'A', name:'吉田', avatar:'吉', side:'left', jp:'10枚　コピーして、会議室に　持って　きて　ください。', reading:'じゅうまい　こぴーして、かいぎしつに　もって　きて　ください。', zh:'复印10份，带到会议室来。' },
+  ],
+  vocab: [
+    { jp:'〜てください', reading:'〜てください', zh:'请做…（请求）', type:'助动' },
+    { jp:'〜ないでください', reading:'〜ないでください', zh:'请不要做…（否定请求）', type:'助动' },
+    { jp:'かぎ', reading:'かぎ', zh:'钥匙', type:'名' },
+    { jp:'忘れます', reading:'わすれます', zh:'忘记', type:'动2' },
+    { jp:'準備', reading:'じゅんび', zh:'准备', type:'名' },
+    { jp:'遅刻', reading:'ちこく', zh:'迟到', type:'名' },
+    { jp:'資料', reading:'しりょう', zh:'资料', type:'名' },
+    { jp:'コピーします', reading:'こぴーします', zh:'复印', type:'动3' },
+    { jp:'持ちます', reading:'もちます', zh:'拿/持有', type:'动1' },
+    { jp:'始まります', reading:'はじまります', zh:'开始（自动词）', type:'动1' },
+    { jp:'開けます', reading:'あけます', zh:'打开', type:'动2' },
+    { jp:'閉めます', reading:'しめます', zh:'关闭', type:'动2' },
+    { jp:'静かにします', reading:'しずかにします', zh:'保持安静', type:'动3' },
+    { jp:'わかりました', reading:'わかりました', zh:'明白了/知道了', type:'惯' },
+    { jp:'〜枚', reading:'〜まい', zh:'〜张/份', type:'量' },
+  ],
+  grammar: [
+    { title:'〜て　ください（请求）', pattern:'動詞て形 + ください', desc:'てください表示礼貌的请求"请做…"，是最常用的请求表达。否定形是ないでください。', examples:[
+      { jp:'ここに　名前を　書いて　ください。', zh:'请在这里写名字。' },
+      { jp:'ゆっくり　話して　ください。', zh:'请慢慢说。' },
+      { jp:'窓を　開けて　ください。', zh:'请打开窗户。' },
+    ]},
+    { title:'〜ないで　ください（请勿）', pattern:'動詞ない形 + でください', desc:'ないでください表示"请不要做…"，是禁止或请求不做的礼貌表达。', examples:[
+      { jp:'遅刻しないで　ください。', zh:'请不要迟到。' },
+      { jp:'ここで　写真を　撮らないで　ください。', zh:'请不要在这里拍照。' },
+      { jp:'心配しないで　ください。', zh:'请不要担心。' },
+    ]},
+  ]
+},
+
+l20: {
+  title: 'スミスさんは　ピアノを　弾く　ことが　できます',
+  titleZh: '史密斯先生会弹钢琴',
+  unit: '第5単元',
+  grammar_focus: '〜ことができます（能力）',
+  dialogue: [
+    { speaker:'A', name:'小野', avatar:'小', side:'left', jp:'スミスさんは　ピアノが　弾けますか。', reading:'すみすさんは　ぴあのが　ひけますか。', zh:'史密斯先生会弹钢琴吗？' },
+    { speaker:'B', name:'スミス', avatar:'ス', side:'right', jp:'はい、弾けます。子供の　頃から　習って　います。', reading:'はい、ひけます。こどもの　ころから　ならって　います。', zh:'是的，会弹。从小就在学。' },
+    { speaker:'A', name:'小野', avatar:'小', side:'left', jp:'李さんは　何か　楽器が　できますか。', reading:'りさんは　なにか　がっきが　できますか。', zh:'李先生会什么乐器吗？' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'二胡を　弾く　ことが　できます。でも、ピアノは　弾けません。', reading:'にこを　ひく　ことが　できます。でも、ぴあのは　ひけません。', zh:'会拉二胡。但不会弹钢琴。' },
+    { speaker:'A', name:'小野', avatar:'小', side:'left', jp:'すごいですね！二胡を　聴いて　みたいです。', reading:'すごいですね！にこを　きいて　みたいです。', zh:'真厉害！想听听二胡。' },
+  ],
+  vocab: [
+    { jp:'〜ことができます', reading:'〜ことができます', zh:'能够做…（能力）', type:'助动' },
+    { jp:'〜（ら）れます', reading:'〜（ら）れます', zh:'能做…（可能形）', type:'助动' },
+    { jp:'弾きます', reading:'ひきます', zh:'弹奏（钢琴等）', type:'动1' },
+    { jp:'ピアノ', reading:'ピアノ', zh:'钢琴', type:'名' },
+    { jp:'二胡', reading:'にこ', zh:'二胡', type:'名' },
+    { jp:'楽器', reading:'がっき', zh:'乐器', type:'名' },
+    { jp:'料理ができます', reading:'りょうりができます', zh:'会做饭', type:'动' },
+    { jp:'泳げます', reading:'およげます', zh:'会游泳', type:'动1可' },
+    { jp:'運転できます', reading:'うんてんできます', zh:'会开车', type:'动3可' },
+    { jp:'頃', reading:'ころ', zh:'时候/时期', type:'名' },
+    { jp:'から', reading:'から', zh:'从…（起点）', type:'助' },
+    { jp:'習います', reading:'ならいます', zh:'学习/学', type:'动1' },
+    { jp:'すごい', reading:'すごい', zh:'厉害的/了不起的', type:'形1' },
+    { jp:'〜てみます', reading:'〜てみます', zh:'试着做…', type:'助动' },
+    { jp:'〜が、できます', reading:'〜が、できます', zh:'会…/能…', type:'助动' },
+  ],
+  grammar: [
+    { title:'〜ことが　できます', pattern:'動詞辞書形 + ことができます', desc:'ことができます表示能力"能够做…/会做…"，辞书形（原形）后接ことができます。也可用可能形直接表达。', examples:[
+      { jp:'ピアノを　弾く　ことが　できます。', zh:'会弹钢琴。' },
+      { jp:'日本語で　話す　ことが　できます。', zh:'能用日语说话。' },
+      { jp:'漢字を　読む　ことが　できません。', zh:'不会读汉字。' },
+    ]},
+    { title:'動詞の可能形', pattern:'動詞 → 可能形（〜える/〜られる）', desc:'可能形是另一种表达能力的方式，1类动词末音变为え段加る，2类加られる，3类する→できる、くる→こられる。', examples:[
+      { jp:'ピアノが　弾けます。', zh:'会弹钢琴。（弾く→弾ける）' },
+      { jp:'日本語が　話せます。', zh:'会说日语。（話す→話せる）' },
+    ]},
+  ]
+},
+
+l21: {
+  title: '荷物を　送って　もらいました',
+  titleZh: '请人帮忙寄了行李',
+  unit: '第6単元',
+  grammar_focus: '授受动词 もらいます・くれます・あげます',
+  dialogue: [
+    { speaker:'A', name:'森', avatar:'森', side:'left', jp:'李さん、引越しは　順調に　できましたか。', reading:'りさん、ひっこしは　じゅんちょうに　できましたか。', zh:'李先生，搬家顺利吗？' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'はい、森さんに　手伝って　もらいました。ありがとうございました。', reading:'はい、もりさんに　てつだって　もらいました。ありがとうございました。', zh:'是的，请森先生帮忙了。非常感谢。' },
+    { speaker:'A', name:'森', avatar:'森', side:'left', jp:'荷物は　どうしましたか。', reading:'にもつは　どうしましたか。', zh:'行李怎么解决的？' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'宅配便で　送って　もらいました。とても　便利でした。', reading:'たくはいびんで　おくって　もらいました。とても　べんりでした。', zh:'用宅急便寄送了。非常方便。' },
+    { speaker:'A', name:'森', avatar:'森', side:'left', jp:'新しい　アパートは　どうですか。', reading:'あたらしい　あぱーとは　どうですか。', zh:'新公寓怎么样？' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'駅から　近くて、とても　住みやすいです。', reading:'えきから　ちかくて、とても　すみやすいです。', zh:'离车站近，非常住着舒服。' },
+  ],
+  vocab: [
+    { jp:'もらいます', reading:'もらいます', zh:'得到/收到（从他人处）', type:'动1' },
+    { jp:'くれます', reading:'くれます', zh:'给（他人给我）', type:'动2' },
+    { jp:'あげます', reading:'あげます', zh:'给（我给他人）', type:'动2' },
+    { jp:'〜てもらいます', reading:'〜てもらいます', zh:'请/让人家做…', type:'动' },
+    { jp:'〜てくれます', reading:'〜てくれます', zh:'（为我）做…', type:'动' },
+    { jp:'〜てあげます', reading:'〜てあげます', zh:'为（别人）做…', type:'动' },
+    { jp:'荷物', reading:'にもつ', zh:'行李', type:'名' },
+    { jp:'引越し', reading:'ひっこし', zh:'搬家', type:'名' },
+    { jp:'宅配便', reading:'たくはいびん', zh:'宅急便/快递', type:'名' },
+    { jp:'送ります', reading:'おくります', zh:'寄送', type:'动1' },
+    { jp:'手伝います', reading:'てつだいます', zh:'帮忙', type:'动1' },
+    { jp:'順調', reading:'じゅんちょう', zh:'顺利的', type:'形2' },
+    { jp:'住みやすい', reading:'すみやすい', zh:'住着舒适的', type:'形1' },
+    { jp:'〜に', reading:'〜に', zh:'向/从（授受对象）', type:'助' },
+    { jp:'アパート', reading:'アパート', zh:'公寓', type:'名' },
+  ],
+  grammar: [
+    { title:'〜て　もらいます', pattern:'人に 動詞て形 + もらいます', desc:'てもらいます表示请求他人为自己做某事，或从他人处得到某种行为的恩惠。行为者用に标记。', examples:[
+      { jp:'森さんに　手伝って　もらいました。', zh:'请森先生帮忙了。' },
+      { jp:'先生に　教えて　もらいました。', zh:'请老师教了我。' },
+    ]},
+    { title:'〜て　くれます', pattern:'人が 動詞て形 + くれます', desc:'てくれます表示他人主动为我（说话人）做某事，强调对方的好意，行为者用が标记。', examples:[
+      { jp:'森さんが　手伝って　くれました。', zh:'森先生（主动）帮了我。' },
+      { jp:'友達が　プレゼントを　くれました。', zh:'朋友给了我礼物。' },
+    ]},
+    { title:'〜て　あげます', pattern:'人に 動詞て形 + あげます', desc:'てあげます表示我为他人做某事，是给予行为。注意不能对长辈或上级随便使用。', examples:[
+      { jp:'友達に　本を　貸して　あげました。', zh:'借书给了朋友。' },
+      { jp:'子供に　教えて　あげます。', zh:'教给孩子。' },
+    ]},
+  ]
+},
+
+l22: {
+  title: '森さんは　李さんに　辞書を　くれました',
+  titleZh: '森先生送给了李先生词典',
+  unit: '第6単元',
+  grammar_focus: '授受动词的综合用法',
+  dialogue: [
+    { speaker:'A', name:'小野', avatar:'小', side:'left', jp:'李さん、その　辞書は　新しいですね。', reading:'りさん、その　じしょは　あたらしいですね。', zh:'李先生，那本词典是新的呢。' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'はい、森さんが　くれました。誕生日の　プレゼントです。', reading:'はい、もりさんが　くれました。たんじょうびの　ぷれぜんとです。', zh:'是的，森先生给的。是生日礼物。' },
+    { speaker:'A', name:'小野', avatar:'小', side:'left', jp:'いいですね。李さんは　森さんに　何か　あげましたか。', reading:'いいですね。りさんは　もりさんに　なにか　あげましたか。', zh:'真好啊。李先生给森先生什么了吗？' },
+    { speaker:'B', name:'李', avatar:'李', side:'right', jp:'中国の　お茶を　あげました。森さんは　お茶が　好きですから。', reading:'ちゅうごくの　おちゃを　あげました。もりさんは　おちゃが　すきですから。', zh:'送了中国茶。因为森先生喜欢喝茶。' },
+    { speaker:'A', name:'小野', avatar:'小', side:'left', jp:'すてきな　友達ですね。', reading:'すてきな　ともだちですね。', zh:'真是美好的友谊啊。' },
+  ],
+  vocab: [
+    { jp:'辞書', reading:'じしょ', zh:'词典', type:'名' },
+    { jp:'誕生日', reading:'たんじょうび', zh:'生日', type:'名' },
+    { jp:'プレゼント', reading:'プレゼント', zh:'礼物', type:'名' },
+    { jp:'お茶', reading:'おちゃ', zh:'茶', type:'名' },
+    { jp:'友達', reading:'ともだち', zh:'朋友', type:'名' },
+    { jp:'〜から', reading:'〜から', zh:'因为…（原因）', type:'助' },
+    { jp:'すてき', reading:'すてき', zh:'美好的/漂亮的', type:'形2' },
+    { jp:'贈り物', reading:'おくりもの', zh:'礼品', type:'名' },
+    { jp:'花', reading:'はな', zh:'花', type:'名' },
+    { jp:'ケーキ', reading:'ケーキ', zh:'蛋糕', type:'名' },
+    { jp:'チョコレート', reading:'チョコレート', zh:'巧克力', type:'名' },
+    { jp:'〜ですから', reading:'〜ですから', zh:'因为…（原因说明）', type:'助' },
+    { jp:'だれに', reading:'だれに', zh:'给谁', type:'疑' },
+    { jp:'だれが', reading:'だれが', zh:'谁（主语）', type:'疑' },
+    { jp:'もらいます', reading:'もらいます', zh:'得到/收到', type:'动1' },
+  ],
+  grammar: [
+    { title:'〜から（理由）', pattern:'文 + から、文', desc:'から接在句子末尾表示原因理由，相当于中文"因为"。与节用で的区别：から更主观，で更客观。', examples:[
+      { jp:'お茶が　好きですから、あげました。', zh:'因为喜欢茶，所以送了。' },
+      { jp:'雨ですから、行きません。', zh:'因为下雨，所以不去。' },
+    ]},
+    { title:'授受动词三方向总结', pattern:'もらう（得）・くれる（给我）・あげる（给人）', desc:'三个授受动词方向不同：あげる（我→他人）、くれる（他人→我/我方）、もらう（我从他人处得到）。', examples:[
+      { jp:'友達に　本を　あげました。', zh:'给了朋友书。（我→朋友）' },
+      { jp:'友達が　本を　くれました。', zh:'朋友给了我书。（朋友→我）' },
+      { jp:'友達に　本を　もらいました。', zh:'从朋友那里得到了书。（我从朋友处）' },
+    ]},
+  ]
+},
+
+l23: {
+  title: '田中さんは　来年　結婚すると　言っていました',
+  titleZh: '田中先生说明年要结婚',
+  unit: '第6単元',
+  grammar_focus: '〜と言っています・〜そうです（传闻）',
+  dialogue: [
+    { speaker:'A', name:'李', avatar:'李', side:'left', jp:'田中さんは　来年　結婚するそうですね。', reading:'たなかさんは　らいねん　けっこんするそうですね。', zh:'听说田中先生明年要结婚呢。' },
+    { speaker:'B', name:'森', avatar:'森', side:'right', jp:'そうです。相手は　田中さんの　大学の　同級生だそうです。', reading:'そうです。あいては　たなかさんの　だいがくの　どうきゅうせいだそうです。', zh:'是的。听说对方是田中先生的大学同学。' },
+    { speaker:'A', name:'李', avatar:'李', side:'left', jp:'田中さんは　どこに　住むと　言っていましたか。', reading:'たなかさんは　どこに　すむと　いっていましたか。', zh:'田中先生说要住在哪里？' },
+    { speaker:'B', name:'森', avatar:'森', side:'right', jp:'横浜に　マンションを　買うと　言っていました。', reading:'よこはまに　まんしょんを　かうと　いっていました。', zh:'说要在横滨买公寓。' },
+    { speaker:'A', name:'李', avatar:'李', side:'left', jp:'そうですか。おめでとうございます　と　伝えて　ください。', reading:'そうですか。おめでとうございます　と　つたえて　ください。', zh:'是吗。请代我转告恭喜。' },
+  ],
+  vocab: [
+    { jp:'〜と言っています', reading:'〜といっています', zh:'说…/说是…', type:'动' },
+    { jp:'〜そうです', reading:'〜そうです', zh:'听说…（传闻）', type:'助动' },
+    { jp:'結婚します', reading:'けっこんします', zh:'结婚', type:'动3' },
+    { jp:'相手', reading:'あいて', zh:'对方', type:'名' },
+    { jp:'同級生', reading:'どうきゅうせい', zh:'同学', type:'名' },
+    { jp:'マンション', reading:'マンション', zh:'公寓（高档）', type:'名' },
+    { jp:'横浜', reading:'よこはま', zh:'横滨', type:'专' },
+    { jp:'住みます', reading:'すみます', zh:'居住', type:'动1' },
+    { jp:'買います', reading:'かいます', zh:'买', type:'动1' },
+    { jp:'伝えます', reading:'つたえます', zh:'转告/传达', type:'动2' },
+    { jp:'おめでとうございます', reading:'おめでとうございます', zh:'恭喜你', type:'惯' },
+    { jp:'〜と', reading:'〜と', zh:'（引用助词）', type:'助' },
+    { jp:'〜だそうです', reading:'〜だそうです', zh:'听说是…（名词/な形传闻）', type:'助动' },
+    { jp:'〜とのことです', reading:'〜とのことです', zh:'据说…', type:'助动' },
+    { jp:'大学', reading:'だいがく', zh:'大学', type:'名' },
+  ],
+  grammar: [
+    { title:'〜と　言っています', pattern:'「発言内容」と　言っています', desc:'と是引用助词，言っています表示某人说了某话。内容用普通体（简体），置于と之前。', examples:[
+      { jp:'田中さんは　来月　帰ると　言っています。', zh:'田中先生说下个月回去。' },
+      { jp:'彼女は　元気だと　言っていました。', zh:'她说她很好。' },
+    ]},
+    { title:'〜そうです（伝聞）', pattern:'普通体 + そうです', desc:'传闻的そうです接在普通体（简体）后，表示听说某事，是从别处得到的信息。注意与样态そうです区别。', examples:[
+      { jp:'田中さんは　結婚するそうです。', zh:'听说田中先生要结婚。' },
+      { jp:'明日は　雨だそうです。', zh:'听说明天下雨。' },
+    ]},
+  ]
+},
+
+l24: {
+  title: '李さんは　会議室に　入って　はいけません',
+  titleZh: '李先生不可以进入会议室',
+  unit: '第6単元',
+  grammar_focus: '〜てもいいです・〜てはいけません・〜なければなりません',
+  dialogue: [
+    { speaker:'A', name:'李', avatar:'李', side:'left', jp:'すみません、ここで　写真を　撮っても　いいですか。', reading:'すみません、ここで　しゃしんを　とっても　いいですか。', zh:'请问，可以在这里拍照吗？' },
+    { speaker:'B', name:'案内', avatar:'案', side:'right', jp:'申し訳ありません。ここでは　撮って　はいけません。', reading:'もうしわけありません。ここでは　とって　はいけません。', zh:'非常抱歉。这里不可以拍照。' },
+    { speaker:'A', name:'李', avatar:'李', side:'left', jp:'そうですか。では、ここに　入っても　いいですか。', reading:'そうですか。では、ここに　はいっても　いいですか。', zh:'这样啊。那，可以进入这里吗？' },
+    { speaker:'B', name:'案内', avatar:'案', side:'right', jp:'はい、入っても　いいですが、静かに　して　ください。', reading:'はい、はいっても　いいですが、しずかに　して　ください。', zh:'可以进入，但请保持安静。' },
+    { speaker:'A', name:'李', avatar:'李', side:'left', jp:'わかりました。ありがとうございます。', reading:'わかりました。ありがとうございます。', zh:'明白了。谢谢您。' },
+  ],
+  vocab: [
+    { jp:'〜てもいいです', reading:'〜てもいいです', zh:'可以做…（许可）', type:'助动' },
+    { jp:'〜てはいけません', reading:'〜てはいけません', zh:'不可以做…（禁止）', type:'助动' },
+    { jp:'〜なければなりません', reading:'〜なければなりません', zh:'必须做…（义务）', type:'助动' },
+    { jp:'〜なくてもいいです', reading:'〜なくてもいいです', zh:'不必做…（非义务）', type:'助动' },
+    { jp:'写真', reading:'しゃしん', zh:'照片', type:'名' },
+    { jp:'入ります', reading:'はいります', zh:'进入', type:'动1' },
+    { jp:'出ます', reading:'でます', zh:'出去/离开', type:'动2' },
+    { jp:'申し訳ありません', reading:'もうしわけありません', zh:'非常抱歉', type:'惯' },
+    { jp:'〜が', reading:'〜が', zh:'但是/虽然（转折）', type:'助' },
+    { jp:'では', reading:'では', zh:'那么', type:'接' },
+    { jp:'ここでは', reading:'ここでは', zh:'在这里（强调）', type:'助' },
+    { jp:'静かに', reading:'しずかに', zh:'安静地', type:'副' },
+    { jp:'タバコ', reading:'タバコ', zh:'香烟', type:'名' },
+    { jp:'飲酒', reading:'いんしゅ', zh:'饮酒', type:'名' },
+    { jp:'必ず', reading:'かならず', zh:'必须/一定', type:'副' },
+  ],
+  grammar: [
+    { title:'〜ても　いいです（许可）', pattern:'動詞て形 + も　いいです', desc:'てもいいです表示许可"可以做…"，疑问形〜てもいいですか用于请求许可，相当于"可以…吗？"', examples:[
+      { jp:'ここで　写真を　撮っても　いいです。', zh:'可以在这里拍照。' },
+      { jp:'帰っても　いいですか。', zh:'可以回去吗？' },
+    ]},
+    { title:'〜ては　いけません（禁止）', pattern:'動詞て形 + は　いけません', desc:'てはいけません表示禁止"不可以做…"，语气较强，通常是规则或道德层面的禁止。', examples:[
+      { jp:'ここでは　写真を　撮っては　いけません。', zh:'在这里不可以拍照。' },
+      { jp:'授業中に　スマホを　使っては　いけません。', zh:'上课时不可以用手机。' },
+    ]},
+    { title:'〜なければ　なりません（义务）', pattern:'動詞ない形（去い）＋なければなりません', desc:'なければなりません表示"必须做…/不得不做…"，口语常缩略为なきゃ/なければ。', examples:[
+      { jp:'明日までに　レポートを　出さなければ　なりません。', zh:'必须在明天之前交报告。' },
+      { jp:'毎日　薬を　飲まなければ　なりません。', zh:'必须每天吃药。' },
+    ]},
+  ]
+},
+
+
+};
+
+// ============================================================
+// STATE
+// ============================================================
+let currentLesson = null;
+let currentTab = 'dialogue';
+let flashcardIndex = 0;
+let flashcardShowing = false;
+let fcCorrect = 0, fcTotal = 0;
+let quizIndex = 0, quizScore = 0;
+let quizAnswered = false;
+let voiceRate = 0.85;
+let selectedVoiceURI = '';
+let japaneseVoices = [];
+let speechQueue = [];
+let isSpeaking = false;
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showHome() {
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById('screen-home').classList.remove('hidden');
+  document.getElementById('back-btn').classList.add('hidden');
+  document.getElementById('header-title').textContent = '標準日本語';
+  document.getElementById('header-sub').textContent = '新版中日交流 · 初级上册';
+  document.getElementById('header-badge').textContent = '初级';
+  setActiveNav('nav-home');
+  speechSynthesis.cancel();
+}
+
+function showSettings() {
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById('screen-settings').classList.remove('hidden');
+  document.getElementById('back-btn').classList.add('hidden');
+  document.getElementById('header-title').textContent = '设置';
+  document.getElementById('header-sub').textContent = '';
+  document.getElementById('header-badge').textContent = '';
+  setActiveNav('nav-settings');
+}
+
+function setActiveNav(id) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id)?.classList.add('active');
+}
+
+function goBack() { showHome(); }
+
+function openLesson(id) {
+  currentLesson = LESSONS[id];
+  if (!currentLesson) return;
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById('screen-lesson').classList.remove('hidden');
+  document.getElementById('back-btn').classList.remove('hidden');
+  document.getElementById('header-title').textContent = currentLesson.title;
+  document.getElementById('header-sub').textContent = currentLesson.unit + ' · ' + currentLesson.grammar_focus;
+  document.getElementById('header-badge').textContent = currentLesson.titleZh;
+  setActiveNav('');
+  switchTab('dialogue');
+  flashcardIndex = 0; fcCorrect = 0; fcTotal = 0; vocabIndex = 0;
+  quizIndex = 0; quizScore = 0; quizAnswered = false;
+  speechSynthesis.cancel();
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(tab) {
+  currentTab = tab;
+  const TABS = ['dialogue','vocab','grammar','flashcard','quiz'];
+  // Update tab buttons
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', TABS[i] === tab);
+  });
+  // Show only the active panel
+  TABS.forEach(t => {
+    const el = document.getElementById('tab-' + t);
+    if (t === tab) el.classList.add('active');
+    else el.classList.remove('active');
+  });
+  speechSynthesis.cancel();
+  if (tab === 'dialogue') renderDialogue();
+  else if (tab === 'vocab') { vocabIndex = 0; renderVocab(); }
+  else if (tab === 'grammar') renderGrammar();
+  else if (tab === 'flashcard') { flashcardIndex = 0; flashcardShowing = false; renderFlashcard(); }
+  else if (tab === 'quiz') { quizIndex = 0; quizScore = 0; quizAnswered = false; renderQuiz(); }
+}
+
+// ============================================================
+// DIALOGUE
+// ============================================================
+function renderDialogue() {
+  const c = document.getElementById('dialogue-content');
+  const L = currentLesson;
+  let html = `<div class="dialogue-intro"><strong>本课重点：</strong>${L.grammar_focus}<br><strong>场景：</strong>${L.titleZh}</div>`;
+  html += `<button class="play-all-btn" onclick="playAll()"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>全文朗读</button>`;
+  L.dialogue.forEach((line, i) => {
+    const isRight = line.side === 'right';
+    const avatarClass = i % 3 === 0 ? 'speaker-a' : i % 3 === 1 ? 'speaker-b' : 'speaker-c';
+    html += `<div class="dialogue-line ${isRight ? 'right' : ''}">
+      <div class="speaker-avatar ${avatarClass}">${line.avatar.slice(0,1)}</div>
+      <div>
+        <div class="speak-hint">${line.name ? line.name + ' · ' : ''}点击朗读</div>
+        <div class="bubble" onclick="speakText('${escQ(line.jp)}')">
+          <div class="bubble-jp">${line.jp}</div>
+          <div class="bubble-reading">${line.reading}</div>
+          <div class="bubble-zh">${line.zh}</div>
+        </div>
+      </div>
+    </div>`;
+  });
+  c.innerHTML = html;
+}
+
+function escQ(s) { return s.replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+
+function playAll() {
+  speechSynthesis.cancel();
+  const texts = currentLesson.dialogue.map(l => l.jp);
+  let i = 0;
+  function next() {
+    if (i >= texts.length) return;
+    const utt = makeUtt(texts[i]);
+    utt.onend = () => { i++; setTimeout(next, 400); };
+    speechSynthesis.speak(utt);
+    i++;
+  }
+  next();
+}
+
+// ============================================================
+// VOCAB CARD TURNER
+// ============================================================
+let vocabIndex = 0;
+
+function renderVocab() {
+  const wrap = document.getElementById('vocab-turner-wrap');
+  const vocab = currentLesson.vocab;
+  const v = vocab[vocabIndex];
+  const total = vocab.length;
+
+  // Dots — show max 12
+  const maxDots = Math.min(total, 12);
+  const dots = Array.from({length: maxDots}, (_, i) => {
+    const idx = Math.floor(i * total / maxDots);
+    const isActive = vocabIndex >= Math.floor(i * total / maxDots) && (i === maxDots - 1 || vocabIndex < Math.floor((i+1) * total / maxDots));
+    return `<div class="vocab-dot ${vocabIndex === (total <= 12 ? i : Math.round(i * (total-1)/(maxDots-1))) ? 'active' : ''}" onclick="goVocab(${total <= 12 ? i : Math.round(i * (total-1)/(maxDots-1))})"></div>`;
+  }).join('');
+
+  wrap.innerHTML = `
+    <div class="vocab-card-main" id="vc-main"
+      ontouchstart="vcTouchStart(event)"
+      ontouchend="vcTouchEnd(event)">
+      <div class="vc-type">${v.type}</div>
+      <div class="vc-jp">${v.jp}</div>
+      <div class="vc-reading">${v.reading !== v.jp ? v.reading : ''}</div>
+      <div class="vc-divider"></div>
+      <div class="vc-zh">${v.zh}</div>
+      <button class="vc-speak" onclick="event.stopPropagation();speakText('${escQ(v.jp)}')">🔊 朗读</button>
+    </div>
+    <div class="vocab-nav-row">
+      <button class="vocab-nav-btn" onclick="goVocab(vocabIndex-1)" ${vocabIndex===0?'disabled':''}>‹</button>
+      <div class="vocab-dots">${dots}</div>
+      <div class="vocab-counter">${vocabIndex+1}/${total}</div>
+      <button class="vocab-nav-btn" onclick="goVocab(vocabIndex+1)" ${vocabIndex===total-1?'disabled':''}>›</button>
+    </div>`;
+
+  speakText(v.jp);
+}
+
+function goVocab(idx) {
+  const total = currentLesson.vocab.length;
+  if (idx < 0 || idx >= total) return;
+  vocabIndex = idx;
+  renderVocab();
+}
+
+// Swipe support
+let vcTouchX = 0;
+function vcTouchStart(e) { vcTouchX = e.touches[0].clientX; }
+function vcTouchEnd(e) {
+  const dx = e.changedTouches[0].clientX - vcTouchX;
+  if (Math.abs(dx) > 40) goVocab(vocabIndex + (dx < 0 ? 1 : -1));
+}
+
+// ============================================================
+// GRAMMAR
+// ============================================================
+function renderGrammar() {
+  const c = document.getElementById('grammar-content');
+  c.innerHTML = currentLesson.grammar.map((g, i) => `
+    <div class="grammar-point">
+      <div class="grammar-num">语法 ${i+1}</div>
+      <div class="grammar-title">${g.title}</div>
+      <div class="grammar-pattern">${g.pattern}</div>
+      <div class="grammar-desc">${g.desc}</div>
+      <div class="grammar-examples">
+        ${g.examples.map(e => `
+          <div class="grammar-ex" onclick="speakText('${escQ(e.jp)}')">
+            <div class="grammar-ex-jp">▶ ${e.jp}</div>
+            <div class="grammar-ex-zh">${e.zh}</div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+// ============================================================
+// FLASHCARD
+// ============================================================
+function renderFlashcard() {
+  const c = document.getElementById('flashcard-content');
+  const vocab = currentLesson.vocab;
+  if (flashcardIndex >= vocab.length) {
+    c.innerHTML = `<div class="flashcard" style="background:var(--green-bg)">
+      <div class="fc-word" style="color:var(--green)">完成！</div>
+      <div class="fc-reading" style="color:var(--green)">Great job!</div>
+      <div class="fc-hint">本组单词已全部复习完毕</div>
+    </div>
+    <div class="fc-score" style="text-align:center;color:var(--ink2);font-size:15px">
+      正确 ${fcCorrect} / ${vocab.length} 个
+    </div>
+    <button onclick="flashcardIndex=0;fcCorrect=0;fcTotal=0;flashcardShowing=false;renderFlashcard()" style="background:var(--red);color:#fff;border:none;border-radius:30px;padding:12px 24px;font-size:14px;font-weight:600;cursor:pointer;margin:0 auto;display:block">重新开始</button>`;
+    return;
+  }
+  const v = vocab[flashcardIndex];
+  flashcardShowing = false;
+  c.innerHTML = `
+    <div class="fc-progress">${flashcardIndex + 1} / ${vocab.length}</div>
+    <div class="flashcard" id="fc-card" onclick="flipCard()">
+      <div class="fc-word">${v.jp}</div>
+      <div class="fc-reading">${v.reading !== v.jp ? v.reading : ''}</div>
+      <div class="fc-zh fc-hidden" id="fc-zh">${v.zh}</div>
+      <div class="fc-hint" id="fc-hint">点击翻转查看中文</div>
+    </div>
+    <button class="fc-speak-btn" onclick="speakText('${escQ(v.jp)}')">🔊 朗读</button>
+    <div class="fc-controls" id="fc-controls" style="display:none">
+      <button class="fc-btn wrong" onclick="fcAnswer(false)">✗ 不会</button>
+      <button class="fc-btn right" onclick="fcAnswer(true)">✓ 记住了</button>
+    </div>`;
+}
+
+function flipCard() {
+  flashcardShowing = !flashcardShowing;
+  document.getElementById('fc-zh').classList.toggle('fc-hidden', !flashcardShowing);
+  document.getElementById('fc-hint').textContent = flashcardShowing ? '你记住了吗？' : '点击翻转查看中文';
+  document.getElementById('fc-controls').style.display = flashcardShowing ? 'flex' : 'none';
+  if (flashcardShowing) speakText(currentLesson.vocab[flashcardIndex].jp);
+}
+
+function fcAnswer(correct) {
+  if (correct) fcCorrect++;
+  fcTotal++;
+  flashcardIndex++;
+  flashcardShowing = false;
+  renderFlashcard();
+}
+
+// ============================================================
+// QUIZ
+// ============================================================
+function renderQuiz() {
+  const c = document.getElementById('quiz-content');
+  const vocab = currentLesson.vocab;
+  if (quizIndex >= Math.min(8, vocab.length)) {
+    const pct = Math.round(quizScore / Math.min(8, vocab.length) * 100);
+    const emoji = pct >= 80 ? '🎉' : pct >= 60 ? '👍' : '📚';
+    c.innerHTML = `<div class="quiz-score">${emoji}<br><span class="quiz-score-num">${pct}%</span>
+      正确 ${quizScore} / ${Math.min(8, vocab.length)} 题</div>
+      <button onclick="quizIndex=0;quizScore=0;quizAnswered=false;renderQuiz()" style="background:var(--red);color:#fff;border:none;border-radius:30px;padding:12px 24px;font-size:14px;font-weight:600;cursor:pointer;margin:0 auto;display:block">再来一次</button>`;
+    return;
+  }
+  const correct = vocab[quizIndex % vocab.length];
+  const others = vocab.filter((_,i) => i !== quizIndex % vocab.length);
+  const shuffled = [...others].sort(() => Math.random() - 0.5).slice(0, 3);
+  const options = [...shuffled, correct].sort(() => Math.random() - 0.5);
+  quizAnswered = false;
+  c.innerHTML = `
+    <div class="quiz-q">
+      <div style="font-size:32px;margin-bottom:8px">${correct.jp}</div>
+      <div class="quiz-q-sub">${correct.reading !== correct.jp ? correct.reading : ''}</div>
+    </div>
+    <div class="quiz-q-sub" style="text-align:center;color:var(--ink3);font-size:13px">选择正确的中文意思</div>
+    <div class="quiz-options">
+      ${options.map(o => `<button class="quiz-opt" onclick="checkAnswer(this,'${escQ(o.zh)}','${escQ(correct.zh)}')">${o.zh}</button>`).join('')}
+    </div>`;
+}
+
+function checkAnswer(btn, chosen, correct) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  document.querySelectorAll('.quiz-opt').forEach(b => {
+    if (b.textContent.trim() === correct) b.classList.add('correct');
+  });
+  if (chosen === correct) { quizScore++; showToast('正确！✓'); }
+  else { btn.classList.add('wrong'); showToast('再想想… ✗'); }
+  speakText(currentLesson.vocab[quizIndex % currentLesson.vocab.length].jp);
+  setTimeout(() => { quizIndex++; renderQuiz(); }, 1600);
+}
+
+// ============================================================
+// SPEECH
+// ============================================================
+function makeUtt(text) {
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang = 'ja-JP';
+  utt.rate = voiceRate;
+  utt.pitch = 1.0;
+  if (selectedVoiceURI) {
+    const v = japaneseVoices.find(v => v.voiceURI === selectedVoiceURI);
+    if (v) utt.voice = v;
+  } else if (japaneseVoices.length > 0) {
+    utt.voice = japaneseVoices[0];
+  }
+  return utt;
+}
+
+function speakText(text) {
+  if (!text.trim()) return;
+  speechSynthesis.cancel();
+  const utt = makeUtt(text);
+  speechSynthesis.speak(utt);
+}
+
+function initVoices() {
+  function load() {
+    japaneseVoices = speechSynthesis.getVoices().filter(v => v.lang.startsWith('ja'));
+    const sel = document.getElementById('voice-select');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">系统默认</option>' +
+      japaneseVoices.map(v => `<option value="${v.voiceURI}">${v.name}</option>`).join('');
+  }
+  load();
+  speechSynthesis.addEventListener('voiceschanged', load);
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+// ============================================================
+// SERVICE WORKER
+// ============================================================
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+
+// ============================================================
+// INIT
+// ============================================================
+initVoices();
+</script>
+</body>
+</html>
